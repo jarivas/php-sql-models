@@ -1,0 +1,30 @@
+{
+    "name": "jarivas/sql-models",
+    "version": "1.1.4",
+    "description": "A simple and light Multi Sql model factory",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+      {
+        "name": "Jose A Rivas",
+        "email": "me@jarivas.work"
+      }
+    ],
+    "autoload": {
+      "psr-4": {
+        "SqlModels\\": "src/"
+      },
+      "autoload-dev": {
+        "psr-4": {
+          "SqlModels\\Tests\\": "tests/"
+       }
+      }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "jarivas/php-env": "*",
+        "vimeo/psalm": "^5.4",
+        "phpmd/phpmd": "^2.13",
+        "phpstan/phpstan": "*"
+    }
+}
