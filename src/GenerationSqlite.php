@@ -8,20 +8,22 @@ use \PDO;
 
 class GenerationSqlite extends Generation
 {
+
+
     /**
      * @return null|array<TableInfo>
      */
     protected function getTablesInfo(): null|array
     {
         $tableNames = $this->getTableNames();
-        $columns = [];
-        $result = [];
+        $columns    = [];
+        $result     = [];
 
         if (is_null($tableNames)) {
             return null;
         }
 
-        foreach($tableNames as $tableName) {
+        foreach ($tableNames as $tableName) {
             $columns = $this->getColumnNames($tableName);
 
             if ($columns) {
@@ -30,12 +32,17 @@ class GenerationSqlite extends Generation
         }
 
         return $result;
-    }
 
+    }//end getTablesInfo()
+
+
+    /**
+     * @return null|array<string>
+     */
     protected function getTableNames(): null|array
     {
         $tables = [];
-        $stmt = $this->connection->query('SELECT name FROM sqlite_master WHERE type = "table"');
+        $stmt   = $this->connection->query('SELECT name FROM sqlite_master WHERE type = "table"');
 
         if (!$stmt) {
             return null;
@@ -47,17 +54,22 @@ class GenerationSqlite extends Generation
             return null;
         }
 
-        foreach($result as $fielDesc) {
+        foreach ($result as $fielDesc) {
             $tables[] = $fielDesc['name'];
         }
 
         return $tables;
-    }
 
+    }//end getTableNames()
+
+
+    /**
+     * @return null|array<string>
+     */
     protected function getColumnNames(string $tableName): null|array
     {
         $columns = [];
-        $stmt = $this->connection->query("PRAGMA table_info($tableName);");
+        $stmt    = $this->connection->query("PRAGMA table_info($tableName);");
 
         if (!$stmt) {
             return null;
@@ -69,10 +81,13 @@ class GenerationSqlite extends Generation
             return null;
         }
 
-        foreach($result as $fielDesc) {
+        foreach ($result as $fielDesc) {
             $columns[] = $fielDesc['name'];
         }
 
         return $columns;
-    }
-}
+
+    }//end getColumnNames()
+
+
+}//end class

@@ -6,6 +6,8 @@ namespace SqlModels;
 
 trait FolderHandler
 {
+
+
     protected function createFolder(string $folder): bool|string
     {
         $error = shell_exec("rm -rf $folder");
@@ -21,14 +23,16 @@ trait FolderHandler
         }
 
         return true;
-    }
 
-    protected function getStubsFolder(): bool|string
+    }//end createFolder()
+
+
+    protected function getStubsFolder(): string
     {
-        $folder = __DIR__.'/stubs/'; //I know this will not work on windows and I could not care less
+        return __DIR__.'/stubs/';
 
-        return file_exists($folder) ? $folder : false;
-    }
+    }//end getStubsFolder()
+
 
     /**
      * @param string $fileName
@@ -49,6 +53,8 @@ trait FolderHandler
         $result = file_put_contents($newFileName, $content);
 
         return (is_numeric($result));
-    }
+
+    }//end copyReplace()
+
 
 }

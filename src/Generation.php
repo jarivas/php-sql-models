@@ -10,22 +10,36 @@ abstract class Generation
 {
     use FolderHandler;
 
-    public const TYPE_SQLITE = 0;
-    public const TYPE_MYSQL = 1;
+    public const TYPE_SQLITE     = 0;
+    public const TYPE_MYSQL      = 1;
     public const TYPE_POSTGRESQL = 2;
 
+    /**
+     * @var PDO $connection used to talk to the DB
+     */
     protected PDO $connection;
 
+    /**
+     * @var string $targetFolder holds the directory where the models will be generated
+     */
     protected string $targetFolder;
 
+    /**
+     * @var string $stubsFolder holds the directory where the studs models are
+     */
     protected string $stubsFolder;
 
+    /**
+     * @var string $dsn the connection string for PDO
+     */
     protected string $dsn;
+
 
     /**
      * @return null|array<TableInfo>
      */
     abstract protected function getTablesInfo(): null|array;
+
 
     public function process(
         int $type,
@@ -33,8 +47,8 @@ abstract class Generation
         string $dbname,
         string $targetFolder,
         string $namespace,
-        null|string $username = null,
-        null|string $password = null
+        null|string $username=null,
+        null|string $password=null
     ): bool|string
     {
         $result = $this->createFolder($targetFolder);
@@ -43,7 +57,7 @@ abstract class Generation
             return $result;
         }
 
-        $this->targetFolder = $targetFolder . '/';
+        $this->targetFolder = $targetFolder.'/';
 
         $this->stubsFolder = $this->getStubsFolder();
 
@@ -62,31 +76,41 @@ abstract class Generation
         }
 
         return $this->generateClasses($namespace);
-    }
+
+    }//end process()
+
 
     protected function generateDsn(int $type, string $host, string $dbname): string
     {
+        $result = '';
+
         if ($type == self::TYPE_SQLITE) {
-            return "sqlite:$host/$dbname";
+            $result = "sqlite:$host/$dbname";
         }
-    }
+
+        return $result;
+
+    }//end generateDsn()
+
 
     /**
      * @throws \PDOException
      */
-    protected function connect(null|string $username = null, null|string $password = null): void
+    protected function connect(null|string $username=null, null|string $password=null): void
     {
         if (isset($this->connection)) {
             return;
         }
 
         $this->connection = new PDO($this->dsn, $username, $password);
-    }
+
+    }//end connect()
+
 
     protected function generateFiles(
         string $namespace,
-        null|string $username = null,
-        null|string $password = null
+        null|string $username=null,
+        null|string $password=null
     ): null|string
     {
         $username = is_null($username) ? 'null' : $username;
@@ -94,8 +118,18 @@ abstract class Generation
 
         $result = $this->generateFile(
             'Connection',
-            ['{{namespace}}', '{{dsn}}', "'{{username}}'", "'{{password}}'"],
-            [$namespace, $this->dsn, $username, $password]
+            [
+                '{{namespace}}',
+                '{{dsn}}',
+                "'{{username}}'",
+                "'{{password}}'",
+            ],
+            [
+                $namespace,
+                $this->dsn,
+                $username,
+                $password,
+            ]
         );
 
         if (! $result) {
@@ -111,7 +145,9 @@ abstract class Generation
         }
 
         return null;
-    }
+
+    }//end generateFiles()
+
 
     /**
      * @param string $fileName model filename
@@ -120,11 +156,13 @@ abstract class Generation
      */
     protected function generateFile(string $fileName, array $search, array $replace): bool
     {
-        $newFileName = $this->targetFolder . $fileName . '.php';
-        $fileName = $this->stubsFolder . $fileName;
+        $newFileName = $this->targetFolder.$fileName.'.php';
+        $fileName    = $this->stubsFolder.$fileName;
 
         return $this->copyReplace($fileName, $newFileName, $search, $replace);
-    }
+
+    }//end generateFile()
+
 
     protected function generateClasses(string $namespace): bool|string
     {
@@ -143,7 +181,9 @@ abstract class Generation
         $this->generateModels($tablesInfo, $content);
 
         return true;
-    }
+
+    }//end generateClasses()
+
 
     protected function getClassmodelContent(string $namespace): null|string
     {
@@ -154,7 +194,9 @@ abstract class Generation
         }
 
         return str_replace('{{namespace}}', $namespace, $content);
-    }
+
+    }//end getClassmodelContent()
+
 
     /**
      * @param array<TableInfo> $tablesInfo
@@ -166,40 +208,52 @@ abstract class Generation
             $tableName = $table->name;
 
             $fileName = preg_replace("/[^\w_]/", '', $tableName);
-            $fileName = $this->toPascalCase($fileName);
 
-            [$columns, $properties] = $this->generateColumnsProperties($table->columns);
+            if (is_string($fileName)) {
+                $fileName = str_replace('_', '', ucwords($fileName, '_'));
 
-            $content = str_replace(
-                ['{{class_name}}', '{{table_name}}', '{{columns}}', '{{properties}}'],
-                [$fileName, $tableName, $columns, $properties],
-                $modelContent
-            );
+                [
+                    $columns,
+                    $properties,
+                ] = $this->generateColumnsProperties($table->columns);
 
-            file_put_contents($this->targetFolder . $fileName . '.php', $content);
-        }
-    }
+                $content = str_replace(
+                    [
+                        '{{class_name}}',
+                        '{{table_name}}',
+                        '{{columns}}',
+                        '{{properties}}',
+                    ],
+                    [
+                        $fileName,
+                        $tableName,
+                        $columns,
+                        $properties,
+                    ],
+                    $modelContent
+                );
 
-    /**
-     * @param string $string
-     * @return string
-     */
-    protected function toPascalCase(string $string): string
-    {
-        return str_replace('_', '', ucwords($string, '_'));
-    }
+                file_put_contents($this->targetFolder.$fileName.'.php', $content);
+            }//end if
+        }//end foreach
+
+    }//end generateModels()
+
 
     /**
      * @param array<string> $colNames
-     * @return array<string, string>
+     * @return array<string>
      */
     protected function generateColumnsProperties(array $colNames): array
     {
-        $columns = '';
+        $columns    = '';
         $properties = '';
 
-        foreach ($colNames as $colName) {
-            $columns .= strlen($columns) ? ',' : '[';
+        foreach ($colNames as $index => $colName) {
+            if ($index > 0) {
+                $columns .= ',' ;
+            }
+
             $columns .= "\n\t\t'$colName'";
 
             $properties .= sprintf("\tpublic $%s;\n", $colName);
@@ -207,6 +261,12 @@ abstract class Generation
 
         $columns .= "\n\t]";
 
-        return [$columns, $properties];
-    }
-}
+        return [
+            $columns,
+            $properties,
+        ];
+
+    }//end generateColumnsProperties()
+
+
+}//end class

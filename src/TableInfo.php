@@ -6,5 +6,16 @@ namespace SqlModels;
 
 class TableInfo
 {
-    public function __construct(public string $name, public array $columns){}
-}
+
+
+    /**
+     * @param    string        $name
+     * @param    array<string> $columns
+     */
+    public function __construct(public string $name='', public array $columns=[])
+    {
+
+    }//end __construct()
+
+
+}//end class
