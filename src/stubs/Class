@@ -9,7 +9,7 @@ class {{class_name}} extends Model
     /**
      * @var string $tableName
      */
-    public string $tableName = '{{table_name}}';
+    protected string $tableName = '{{table_name}}';
 
     /**
      * @var array<string> $columns
