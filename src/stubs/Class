@@ -1,11 +1,20 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace {{namespace}};
 
 class {{class_name}} extends Model
 {
-    public const TABLE_NAME = '{{table_name}}';
-    protected static $columns = {{columns}};
+
+    /**
+     * @var string $tableName
+     */
+    public string $tableName = '{{table_name}}';
+
+    /**
+     * @var array<string> $columns
+     */
+    protected static array $columns = {{columns}};
 
 {{properties}}
-}
+}//end class

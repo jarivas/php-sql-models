@@ -11,11 +11,12 @@ class GenerationTest extends TestCase
 {
     public const NAMESPACE = 'SqlModels\Tests\Sqlite\Models';
 
+
     public function testGenerateOk(): void
     {
-        $dir = dirname(__DIR__, 2);
+        $dir          = dirname(__DIR__, 2);
         $targetFolder = "$dir/Sqlite/Models";
-        $generation = new GenerationSqlite();
+        $generation   = new GenerationSqlite();
 
         $result = $generation->process($generation::TYPE_SQLITE, "$dir/Sqlite", 'chinook.db', $targetFolder, self::NAMESPACE);
 
@@ -25,7 +26,13 @@ class GenerationTest extends TestCase
 
         $this->assertFileExists($testFile);
 
-        $this->assertStringContainsString(self::NAMESPACE, file_get_contents($testFile));
-    }
-     
-}
+        $content = file_get_contents($testFile);
+
+        $this->assertNotEmpty($content);
+
+        $this->assertStringContainsString(self::NAMESPACE, $content);
+
+    }//end testGenerateOk()
+
+
+}//end class

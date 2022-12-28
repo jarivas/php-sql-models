@@ -12,12 +12,8 @@
     ],
     "autoload": {
       "psr-4": {
-        "SqlModels\\": "src/"
-      },
-      "autoload-dev": {
-        "psr-4": {
-          "SqlModels\\Tests\\": "tests/"
-       }
+        "SqlModels\\": "src/",
+        "SqlModels\\Tests\\": "tests/"
       }
     },
     "require-dev": {

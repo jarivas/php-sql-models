@@ -1,4 +1,5 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace {{namespace}};
 
@@ -6,57 +7,106 @@ use Exception;
 use PDO;
 
 class Connection {
-    private $dsn = '{{dsn}}';
-    private $username = '{{username}}';
-    private $password = '{{password}}';
-    private $db = null;
-    private static $instance = null;
 
-    public static function getInstance() : ?Connection
+    /**
+     * @var null|Connection $instance
+     */
+    private static null|Connection $instance = null;
+
+    /**
+     * @var string $dsn
+     */
+    private string $dsn = '{{dsn}}';
+
+    /**
+     * @var PDO $db
+     */
+    private PDO $db;
+
+    /**
+     * @var null|string $username
+     */
+    private null|string $username = '{{username}}';
+
+    /**
+     * @var null|string $password
+     */
+    private null|string $password = '{{password}}';
+
+
+    public static function getInstance() : Connection
     {
-        if (self::$instance == null) self::$instance = new self();
+        if (self::$instance == null) {
+            self::$instance = new self();
+        }
 
         return self::$instance;
-    }
+
+    }//end getInstance()
+
 
     private function __construct()
     {
         $this->db = new PDO($this->dsn, $this->username, $this->password);
-    }
 
-    public function get(string $sql, ?array $params, string $className)
-    {
-        $stmt = $this->db->prepare($sql);
-        
-        if ($stmt->execute($params)) {
-            return $stmt->fetchAll(PDO::FETCH_CLASS, $className);
-        } else {
-            throw new Exception($sql.' '.implode(', ', $stmt->errorInfo()));
-        }
-    }
+    }//end __construct()
 
-    public function executeSql(string $sql, ?array $params = null)
+
+    /**
+     * @param string $sql
+     * @param null|array<string, string> $params
+     * @param string $className
+     * @return bool|array<Model> array of $className
+     */
+    public function get(string $sql, null|array $params, string $className): bool|array
     {
         $stmt = $this->db->prepare($sql);
 
-        if (!$stmt->execute($params)) {
+        if (! $stmt->execute($params)) {
             throw new Exception($sql.' '.implode(', ', $stmt->errorInfo()));
         }
-    }
 
-    public function exec(string $sql)
+        return $stmt->fetchAll(PDO::FETCH_CLASS, $className);
+
+    }//end get()
+
+
+    /**
+     * @param string $sql
+     * @param null|array<string, string> $params
+     */
+    public function executeSql(string $sql, null|array $params=null): void
     {
-        if (!$this->db->exec($sql)) {
+        $stmt = $this->db->prepare($sql);
+
+        if (! $stmt->execute($params)) {
+            throw new Exception($sql.' '.implode(', ', $stmt->errorInfo()));
+        }
+
+    }//end executeSql()
+
+
+    /**
+     * @param string $sql
+     */
+    public function exec(string $sql): void
+    {
+        if (! $this->db->exec($sql)) {
             $error = $this->db->errorInfo();
 
             if ($error[0] != "00000") {
                 throw new Exception($sql.' '.implode(', ', $error));
             }
         }
-    }
 
-    public function lastInsertId(): ?string
+    }//end exec()
+
+
+    public function lastInsertId(): bool|string
     {
         return $this->db->lastInsertId();
-    }
-}
+
+    }//end lastInsertId()
+
+
+}//end class

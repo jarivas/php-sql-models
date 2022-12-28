@@ -246,20 +246,19 @@ abstract class Generation
      */
     protected function generateColumnsProperties(array $colNames): array
     {
-        $columns    = '';
+        $columns    = '[';
         $properties = '';
 
-        foreach ($colNames as $index => $colName) {
-            if ($index > 0) {
-                $columns .= ',' ;
-            }
+        foreach ($colNames as $colName) {
+            $columns .= "\n        '$colName',";
 
-            $columns .= "\n\t\t'$colName'";
-
-            $properties .= sprintf("\tpublic $%s;\n", $colName);
+            $properties .= "    /**\n";
+            $properties .= sprintf("     * @var mixed $%s\n", $colName);
+            $properties .= "    */\n";
+            $properties .= sprintf("    public mixed $%s;\n\n", $colName);
         }
 
-        $columns .= "\n\t]";
+        $columns .= "\n    ]";
 
         return [
             $columns,

@@ -1,27 +1,72 @@
-<?php declare(strict_types=1);
+<?php
+declare(strict_types=1);
 
 namespace {{namespace}};
 
 use Exception;
 use JsonSerializable;
 
-abstract class Model implements JsonSerializable
+class Model implements JsonSerializable
 {
-    use SqlGenerator;
 
-    protected static $columns = [];
+    /**
+     * @var array<string> $columns
+     */
+    protected static array $columns = [];
 
-    protected $selectedColumns;
-    protected $joins = [];
-    protected $where = [];
-    protected $group = '';
+    /**
+     * @var string $tableName
+     */
+    protected string $tableName = '';
+
+    /**
+     * @var array<string> $selectedColumns
+     */
+    protected array $selectedColumns = [];
+
+    /**
+     * @var array<int, array<string, string>> $joins
+     */
+    protected array $joins = [];
+
+    /**
+     * @var array<int, array<string, string>>  $where
+     */
+    protected array $where = [];
+
+    /**
+     * @var string $group
+     */
+    protected string $group = '';
+
+    /**
+     * @var array<int, array<string, string>>  $having
+     */
     protected $having = [];
-    protected $order = '';
-    protected $limit = 100;
-    protected $offset = 0;
 
-    public static function first(array $columnValues): ?self
+    /**
+     * @var string $order
+     */
+    protected string $order = '';
+
+    /**
+     * @var int $limit
+     */
+    protected int $limit = 100;
+
+    /**
+     * @var int $limit
+     */
+    protected int $offset = 0;
+
+
+    /**
+     * @param array<string, string> $columnValues
+     * @return bool|Model
+     */
+    public static function first(array $columnValues): bool|self
     {
+        // @phpstan-ignore-next-line
         $new = new static();
 
         foreach ($columnValues as $column => $value) {
@@ -29,89 +74,156 @@ abstract class Model implements JsonSerializable
         }
 
         return $new->getOne();
-    }
 
-    public function select(array $columns)
+    }//end first()
+
+
+    /**
+     * @param array<string> $columns
+     */
+    public function select(array $columns): void
     {
         if (empty($columns)) {
             return;
         }
 
         $this->selectedColumns = $columns;
-    }
 
-    public function join(string $type, string $tableName, string $onCol1, string $onCol2)
+    }//end select()
+
+
+    /**
+     * @param string $type
+     * @param string $tableName
+     * @param string $onCol1
+     * @param string $onCol2
+     */
+    public function join(string $type, string $tableName, string $onCol1, string $onCol2): void
     {
-        $this->joins[] = ['type' => $type, 'tableName' => $tableName, 'onCol1' => $onCol1, 'onCol2' => $onCol2];
-    }
+        $this->joins[] = [
+            'type'      => $type,
+            'tableName' => $tableName,
+            'onCol1'    => $onCol1,
+            'onCol2'    => $onCol2,
+        ];
 
-    public function where(string $column, string $operator, $value)
+    }//end join()
+
+
+    /**
+     * @param string $column
+     * @param string $operator
+     * @param mixed $value
+     */
+    public function where(string $column, string $operator, mixed $value): void
     {
         $this->where[] = [
             'condition_operator' => 'AND',
-            'column' => $column,
-            'operator' => $operator,
-            'value' => $value,
+            'column'             => $column,
+            'operator'           => $operator,
+            'value'              => $value,
         ];
-    }
 
-    public function whereOr(string $column, string $operator, $value)
+    }//end where()
+
+
+    /**
+     * @param string $column
+     * @param string $operator
+     * @param mixed $value
+     */
+    public function whereOr(string $column, string $operator, mixed $value): void
     {
         $this->where[] = [
             'condition_operator' => 'OR',
-            'column' => $column,
-            'operator' => $operator,
-            'value' => $value,
+            'column'             => $column,
+            'operator'           => $operator,
+            'value'              => $value,
         ];
-    }
 
-    public function having(string $column, string $operator, $value)
+    }//end whereOr()
+
+
+    /**
+     * @param string $column
+     * @param string $operator
+     * @param mixed $value
+     */
+    public function having(string $column, string $operator, mixed $value): void
     {
         $this->having[] = [
             'condition_operator' => 'AND',
-            'column' => $column,
-            'operator' => $operator,
-            'value' => $value,
+            'column'             => $column,
+            'operator'           => $operator,
+            'value'              => $value,
         ];
-    }
 
-    public function havingOr(string $column, string $operator, $value)
+    }//end having()
+
+
+    /**
+     * @param string $column
+     * @param string $operator
+     * @param mixed $value
+     */
+    public function havingOr(string $column, string $operator, mixed $value): void
     {
         $this->having[] = [
             'condition_operator' => 'OR',
-            'column' => $column,
-            'operator' => $operator,
-            'value' => $value,
+            'column'             => $column,
+            'operator'           => $operator,
+            'value'              => $value,
         ];
-    }
 
-    public function order(string $order)
+    }//end havingOr()
+
+
+    /**
+     * @param string $order
+     */
+    public function order(string $order): void
     {
         $this->order = $order;
-    }
 
-    public function limit(int $limit)
+    }//end order()
+
+
+    /**
+     * @param int $limit
+     */
+    public function limit(int $limit): void
     {
         $this->limit = $limit;
-    }
 
-    public function offset(int $offset)
+    }//end limit()
+
+
+    /**
+     * @param int $offset
+     */
+    public function offset(int $offset): void
     {
         $this->offset = $offset;
-    }
 
-    public function get()
+    }//end offset()
+
+
+    /**
+     * @return bool|array<Model> array of current model
+     */
+    public function get(): bool|array
     {
-        $cols = static::$columns;
+        $cols   = static::$columns;
         $params = [];
 
-        if (isset($this->selectedColumns)) {
+        if (! empty($this->selectedColumns)) {
             $cols = $this->selectedColumns;
 
-            unset($this->selectedColumns);
+            $this->selectedColumns = [];
         }
 
-        $sql = static::generateSelect(
+        $sql = SqlGenerator::generateSelect(
+            $this->tableName,
             $params,
             $cols,
             $this->joins,
@@ -126,18 +238,26 @@ abstract class Model implements JsonSerializable
         $this->resetFilters();
 
         return Connection::getInstance()->get($sql, $params, static::class);
-    }
 
-    public function getOne(): ?self
+    }//end get()
+
+
+    public function getOne(): bool|self
     {
         $this->limit(1);
 
         $rows = $this->get();
 
-        return empty($rows) ? null : $rows[0];
-    }
+        if (is_array($rows)) {
+            return $rows[0];
+        }
 
-    public function delete(string $pk = 'id'): bool
+        return false;
+
+    }//end getOne()
+
+
+    public function delete(string $pk='id'): bool
     {
         if (empty($this->$pk)) {
             return false;
@@ -147,33 +267,46 @@ abstract class Model implements JsonSerializable
 
         $this->where($pk, '=', $this->$pk);
 
-        $sql = static::generateDelete($params, $this->where);
+        $sql = SqlGenerator::generateDelete($this->tableName, $params, $this->where);
 
-        unset($this->id);
+        unset($this->$pk);
 
         $this->resetFilters();
 
-        return (Connection::getInstance()->executeSql($sql, $params) > 0);
-    }
+        Connection::getInstance()->executeSql($sql, $params);
 
-    public function save(string $pk = 'id')
+        return true;
+
+    }//end delete()
+
+
+    public function save(string $pk='id'): void
     {
         isset($this->$pk) ? $this->update($pk) : $this->insert($pk);
-    }
 
-    public function __toString()
+    }//end save()
+
+
+    public function __toString(): string
     {
         $data = $this->columnsToParams();
 
-        return json_encode($data, JSON_PRETTY_PRINT);
-    }
+        return strval(json_encode($data, JSON_PRETTY_PRINT));
 
-    public function jsonSerialize()
+    }//end __toString()
+
+
+    public function jsonSerialize(): mixed
     {
         return $this->columnsToParams();
-    }
 
-    protected function columnsToParams(?string $pk = null): array
+    }//end jsonSerialize()
+
+
+    /**
+     * @return array<string, string>
+     */
+    protected function columnsToParams(null|string $pk=null): array
     {
         $params = [];
 
@@ -188,14 +321,16 @@ abstract class Model implements JsonSerializable
         }
 
         return $params;
-    }
 
-    protected function insert(string $pk = 'id')
+    }//end columnsToParams()
+
+
+    protected function insert(string $pk='id'): void
     {
-        $params = $this->columnsToParams($pk);
+        $params     = $this->columnsToParams($pk);
         $connection = Connection::getInstance();
 
-        $sql = static::generateInsert($params);
+        $sql = SqlGenerator::generateInsert($this->tableName, $params);
 
         $connection->executeSql($sql, $params);
 
@@ -206,29 +341,36 @@ abstract class Model implements JsonSerializable
         }
 
         $this->$pk = $id;
-    }
 
-    protected function update(string $pk = 'id')
+    }//end insert()
+
+
+    protected function update(string $pk='id'): void
     {
         $params = $this->columnsToParams($pk);
 
         $this->where($pk, '=', $this->$pk);
 
-        $sql = static::generateUpdate($params, $this->where);
+        $sql = SqlGenerator::generateUpdate($this->tableName, $params, $this->where);
 
         $this->resetFilters();
 
         Connection::getInstance()->executeSql($sql, $params);
-    }
 
-    protected function resetFilters()
+    }//end update()
+
+
+    protected function resetFilters(): void
     {
-        $this->joins = [];
-        $this->where = [];
-        $this->group = '';
+        $this->joins  = [];
+        $this->where  = [];
+        $this->group  = '';
         $this->having = [];
-        $this->order = '';
-        $this->limit = 10;
+        $this->order  = '';
+        $this->limit  = 10;
         $this->offset = 0;
-    }
-}
+
+    }//end resetFilters()
+
+
+}//end class
