@@ -15,8 +15,7 @@ class GenerationMysql extends Generation
      */
     protected function getTableNames(): null|array
     {
-        $tables = [];
-        $stmt   = $this->connection->query('SHOW TABLES');
+        $stmt = $this->connection->query('SHOW TABLES');
 
         if (!$stmt) {
             return null;
