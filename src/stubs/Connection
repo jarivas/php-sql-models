@@ -56,7 +56,7 @@ class Connection {
      * @param string $sql
      * @param null|array<string, string> $params
      * @param string $className
-     * @return bool|array<Model> array of $className
+     * @return bool|array<mixed> array of $className
      */
     public function get(string $sql, null|array $params, string $className): bool|array
     {

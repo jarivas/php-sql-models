@@ -254,8 +254,8 @@ abstract class Generation
 
             $properties .= "    /**\n";
             $properties .= sprintf("     * @var mixed $%s\n", $colName);
-            $properties .= "    */\n";
-            $properties .= sprintf("    public mixed $%s;\n\n", $colName);
+            $properties .= "     */\n";
+            $properties .= sprintf("    public mixed $%s;// phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps\n\n", $colName);
         }
 
         $columns .= "\n    ]";

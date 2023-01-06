@@ -3,6 +3,11 @@ declare(strict_types=1);
 
 namespace {{namespace}};
 
+/**
+ * @method static bool|array<{{class_name}}> first(array<string, string> $columnValues)
+ * @method bool|array<{{class_name}}> get()
+ * @method bool|{{class_name}} getOne()
+ */
 class {{class_name}} extends Model
 {
 

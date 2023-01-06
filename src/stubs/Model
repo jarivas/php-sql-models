@@ -62,9 +62,9 @@ class Model implements JsonSerializable
 
     /**
      * @param array<string, string> $columnValues
-     * @return bool|Model
+     * @return bool|static
      */
-    public static function first(array $columnValues): bool|self
+    public static function first(array $columnValues): mixed
     {
         // @phpstan-ignore-next-line
         $new = new static();
@@ -209,9 +209,9 @@ class Model implements JsonSerializable
 
 
     /**
-     * @return bool|array<Model> array of current model
+     * @return bool|array<static> array of current model
      */
-    public function get(): bool|array
+    public function get(): mixed
     {
         $cols   = static::$columns;
         $params = [];
@@ -241,18 +241,21 @@ class Model implements JsonSerializable
 
     }//end get()
 
-
-    public function getOne(): bool|self
+    /**
+     * @param array<string, string> $columnValues
+     * @return bool|static
+     */
+    public function getOne(): mixed
     {
         $this->limit(1);
 
         $rows = $this->get();
 
-        if (is_array($rows)) {
-            return $rows[0];
+        if (! is_array($rows) || empty($rows)) {
+            return false;
         }
 
-        return false;
+        return $rows[0];
 
     }//end getOne()
 
