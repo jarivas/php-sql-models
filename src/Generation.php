@@ -200,7 +200,7 @@ abstract class Generation
     {
         $tableNames = $this->getTableNames();
         $columns    = [];
-        $dsn     = [];
+        $dsn        = [];
 
         if (is_null($tableNames)) {
             return null;
