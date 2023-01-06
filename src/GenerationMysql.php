@@ -6,7 +6,7 @@ namespace SqlModels;
 
 use \PDO;
 
-class GenerationSqlite extends Generation
+class GenerationMysql extends Generation
 {
 
 
@@ -16,24 +16,13 @@ class GenerationSqlite extends Generation
     protected function getTableNames(): null|array
     {
         $tables = [];
-        $stmt   = $this->connection->query('SELECT name FROM sqlite_master WHERE type = "table"');
+        $stmt   = $this->connection->query('SHOW TABLES');
 
         if (!$stmt) {
             return null;
         }
 
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        if (! $result) {
-            return null;
-        }
-
-        foreach ($result as $fielDesc) {
-            $tables[] = $fielDesc['name'];
-        }
-
-        return $tables;
-
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }//end getTableNames()
 
 
@@ -43,7 +32,7 @@ class GenerationSqlite extends Generation
     protected function getColumnNames(string $tableName): null|array
     {
         $columns = [];
-        $stmt    = $this->connection->query("PRAGMA table_info($tableName);");
+        $stmt    = $this->connection->query("DESC `$tableName`");
 
         if (!$stmt) {
             return null;
@@ -56,7 +45,7 @@ class GenerationSqlite extends Generation
         }
 
         foreach ($result as $fielDesc) {
-            $columns[] = $fielDesc['name'];
+            $columns[] = $fielDesc['Field'];
         }
 
         return $columns;

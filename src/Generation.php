@@ -10,9 +10,9 @@ abstract class Generation
 {
     use FolderHandler;
 
-    public const TYPE_SQLITE     = 0;
-    public const TYPE_MYSQL      = 1;
-    public const TYPE_POSTGRESQL = 2;
+    public const TYPE_SQLITE     = 'sqlite';
+    public const TYPE_MYSQL      = 'mysql';
+    public const TYPE_POSTGRESQL = 'pgsql';
 
     /**
      * @var PDO $connection used to talk to the DB
@@ -36,13 +36,19 @@ abstract class Generation
 
 
     /**
-     * @return null|array<TableInfo>
+     * @return null|array<string>
      */
-    abstract protected function getTablesInfo(): null|array;
+    abstract protected function getTableNames(): null|array;
+
+
+    /**
+     * @return null|array<string>
+     */
+    abstract protected function getColumnNames(string $tableName): null|array;
 
 
     public function process(
-        int $type,
+        string $type,
         string $host,
         string $dbname,
         string $targetFolder,
@@ -51,10 +57,10 @@ abstract class Generation
         null|string $password=null
     ): bool|string
     {
-        $result = $this->createFolder($targetFolder);
+        $dsn = $this->createFolder($targetFolder);
 
-        if (is_string($result)) {
-            return $result;
+        if (is_string($dsn)) {
+            return $dsn;
         }
 
         $this->targetFolder = $targetFolder.'/';
@@ -69,10 +75,10 @@ abstract class Generation
 
         $this->connect($username, $password);
 
-        $result = $this->generateFiles($namespace, $username, $password);
+        $dsn = $this->generateFiles($namespace, $username, $password);
 
-        if ($result) {
-            return $result;
+        if ($dsn) {
+            return $dsn;
         }
 
         return $this->generateClasses($namespace);
@@ -80,15 +86,17 @@ abstract class Generation
     }//end process()
 
 
-    protected function generateDsn(int $type, string $host, string $dbname): string
+    protected function generateDsn(string $type, string $host, string $dbname): string
     {
-        $result = '';
+        $dsn = '';
 
         if ($type == self::TYPE_SQLITE) {
-            $result = "sqlite:$host/$dbname";
+            $dsn = "sqlite:$host/$dbname";
+        } else {
+            $dsn = "$type:dbname=$dbname;host=$host";
         }
 
-        return $result;
+        return $dsn;
 
     }//end generateDsn()
 
@@ -113,10 +121,10 @@ abstract class Generation
         null|string $password=null
     ): null|string
     {
-        $username = is_null($username) ? 'null' : $username;
-        $password = is_null($password) ? 'null' : $password;
+        $username = is_null($username) ? 'null' : "'$username'";
+        $password = is_null($password) ? 'null' : "'$password'";
 
-        $result = $this->generateFile(
+        $dsn = $this->generateFile(
             'Connection',
             [
                 '{{namespace}}',
@@ -132,7 +140,7 @@ abstract class Generation
             ]
         );
 
-        if (! $result) {
+        if (! $dsn) {
             return 'Problem generating the connection file';
         }
 
@@ -183,6 +191,32 @@ abstract class Generation
         return true;
 
     }//end generateClasses()
+
+
+    /**
+     * @return null|array<TableInfo>
+     */
+    protected function getTablesInfo(): null|array
+    {
+        $tableNames = $this->getTableNames();
+        $columns    = [];
+        $dsn     = [];
+
+        if (is_null($tableNames)) {
+            return null;
+        }
+
+        foreach ($tableNames as $tableName) {
+            $columns = $this->getColumnNames($tableName);
+
+            if ($columns) {
+                $dsn[] = new TableInfo($tableName, $columns);
+            }
+        }
+
+        return $dsn;
+
+    }//end getTablesInfo()
 
 
     protected function getClassmodelContent(string $namespace): null|string

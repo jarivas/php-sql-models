@@ -282,8 +282,10 @@ class Model implements JsonSerializable
 
     }//end delete()
 
-
-    public function save(string $pk='id'): void
+    /**
+     * on tables with primary no autoincrement, please use null
+     */
+    public function save(string|null $pk='id'): void
     {
         isset($this->$pk) ? $this->update($pk) : $this->insert($pk);
 
@@ -328,7 +330,7 @@ class Model implements JsonSerializable
     }//end columnsToParams()
 
 
-    protected function insert(string $pk='id'): void
+    protected function insert(string|null $pk='id'): void
     {
         $params     = $this->columnsToParams($pk);
         $connection = Connection::getInstance();
@@ -336,6 +338,10 @@ class Model implements JsonSerializable
         $sql = SqlGenerator::generateInsert(static::$tableName, $params);
 
         $connection->executeSql($sql, $params);
+
+        if (is_null($pk)) {
+            return;
+        }
 
         $id = $connection->lastInsertId();
 
