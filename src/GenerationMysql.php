@@ -23,6 +23,7 @@ class GenerationMysql extends Generation
         }
 
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
+
     }//end getTableNames()
 
 
