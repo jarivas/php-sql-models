@@ -6,6 +6,7 @@ namespace SqlModels\Tests\Unit\Sqlite;
 
 use PHPUnit\Framework\TestCase;
 use SqlModels\GenerationSqlite;
+use SqlModels\Dbms;
 
 class GenerationTest extends TestCase
 {
@@ -21,7 +22,7 @@ class GenerationTest extends TestCase
         $targetFolder = "$testDir/Sqlite/Models";
         $generation   = new GenerationSqlite();
 
-        $result = $generation->process($generation::TYPE_SQLITE, $host, $dbName, $targetFolder, self::NAMESPACE);
+        $result = $generation->process(Dbms::Sqlite, $host, $dbName, $targetFolder, self::NAMESPACE);
 
         $this->assertTrue($result);
 

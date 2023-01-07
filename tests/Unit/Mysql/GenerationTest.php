@@ -6,6 +6,7 @@ namespace SqlModels\Tests\Unit\Mysql;
 
 use PHPUnit\Framework\TestCase;
 use SqlModels\GenerationMysql;
+use SqlModels\Dbms;
 
 class GenerationTest extends TestCase
 {
@@ -19,7 +20,7 @@ class GenerationTest extends TestCase
         $generation   = new GenerationMysql();
 
         $result = $generation->process(
-            $generation::TYPE_MYSQL,
+            Dbms::Mysql,
             $_ENV['MYSQL_HOST'],
             $_ENV['MYSQL_DATABASE'],
             $targetFolder,

@@ -10,10 +10,6 @@ abstract class Generation
 {
     use FolderHandler;
 
-    public const TYPE_SQLITE     = 'sqlite';
-    public const TYPE_MYSQL      = 'mysql';
-    public const TYPE_POSTGRESQL = 'pgsql';
-
     /**
      * @var PDO $connection used to talk to the DB
      */
@@ -48,7 +44,7 @@ abstract class Generation
 
 
     public function process(
-        string $type,
+        Dbms $type,
         string $host,
         string $dbname,
         string $targetFolder,
@@ -86,14 +82,14 @@ abstract class Generation
     }//end process()
 
 
-    protected function generateDsn(string $type, string $host, string $dbname): string
+    protected function generateDsn(Dbms $type, string $host, string $dbname): string
     {
         $dsn = '';
 
-        if ($type == self::TYPE_SQLITE) {
+        if ($type == Dbms::Sqlite) {
             $dsn = "sqlite:$host/$dbname";
         } else {
-            $dsn = "$type:dbname=$dbname;host=$host";
+            $dsn = "{$type->value}:dbname=$dbname;host=$host";
         }
 
         return $dsn;
