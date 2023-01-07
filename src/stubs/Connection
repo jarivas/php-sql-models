@@ -54,11 +54,11 @@ class Connection {
 
     /**
      * @param string $sql
-     * @param null|array<string, string> $params
+     * @param bool|array<string, string> $params
      * @param string $className
      * @return bool|array<mixed> array of $className
      */
-    public function get(string $sql, null|array $params, string $className): bool|array
+    public function get(string $sql, bool|array $params, string $className): bool|array
     {
         $stmt = $this->db->prepare($sql);
 
@@ -73,9 +73,9 @@ class Connection {
 
     /**
      * @param string $sql
-     * @param null|array<string, string> $params
+     * @param bool|array<string, string> $params
      */
-    public function executeSql(string $sql, null|array $params=null): void
+    public function executeSql(string $sql, bool|array $params=null): void
     {
         $stmt = $this->db->prepare($sql);
 

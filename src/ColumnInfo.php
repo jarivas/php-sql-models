@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace SqlModels;
 
-class TableInfo
+class ColumnInfo
 {
 
 
     /**
      * @param    string        $name
-     * @param    array<ColumnInfo> $columns
+     * @param    string        $type
      */
-    public function __construct(public string $name='', public array $columns=[])
+    public function __construct(public string $name='', public string $type='')
     {
 
     }//end __construct()

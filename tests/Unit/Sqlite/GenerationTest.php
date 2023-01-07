@@ -13,7 +13,7 @@ class GenerationTest extends TestCase
     public const NAMESPACE = 'SqlModels\Tests\Sqlite\Models';
 
 
-    public function testGenerateSqliteOk(): void
+    public function testGenerateOk(): void
     {
         $appDir       = dirname(__DIR__, 3);
         $testDir      = dirname(__DIR__, 2);

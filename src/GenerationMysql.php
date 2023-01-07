@@ -11,9 +11,9 @@ class GenerationMysql extends Generation
 
 
     /**
-     * @return null|array<string>
+     * @return bool|array<string>
      */
-    protected function getTableNames(): null|array
+    protected function getTableNames(): bool|array
     {
         $stmt = $this->connection->query('SHOW TABLES');
 
@@ -27,9 +27,9 @@ class GenerationMysql extends Generation
 
 
     /**
-     * @return null|array<string>
+     * @return bool|array<ColumnInfo>
      */
-    protected function getColumnNames(string $tableName): null|array
+    protected function getColumnsInfo(string $tableName): bool|array
     {
         $columns = [];
         $stmt    = $this->connection->query("DESC `$tableName`");
@@ -44,13 +44,51 @@ class GenerationMysql extends Generation
             return null;
         }
 
-        foreach ($result as $fielDesc) {
-            $columns[] = $fielDesc['Field'];
+        foreach ($result as $info) {
+            $name = $info['Field'];
+            $type = $this->convertType($info['Type']);
+
+            $columns[] = new ColumnInfo($name, $type);
         }
 
         return $columns;
 
-    }//end getColumnNames()
+    }//end getColumnsInfo()
+
+
+    protected function convertType(string $type): string
+    {
+        if (str_contains($type, 'int')) {
+            return PhpTypes::Integer->value;
+        }
+
+        if (str_contains($type, 'char')
+        || str_contains($type, 'text')
+        || str_contains($type, 'date')
+        || str_contains($type, 'time')
+        || str_contains($type, 'year')
+        || str_contains($type, 'enum')
+        || str_contains($type, 'set')) {
+            return PhpTypes::String->value;
+        }
+
+        if (str_contains($type, 'bool')
+        || str_contains($type, 'bit')) {
+            return PhpTypes::Bool->value;
+        }
+
+        if (str_contains($type, 'real')
+        || str_contains($type, 'double')
+        || str_contains($type, 'float')
+        || str_contains($type, 'numeric')
+        || str_contains($type, 'decimal')
+        ) {
+            return PhpTypes::Float->value;
+        }
+
+        return PhpTypes::Mixed->value;
+
+    }//end convertType()
 
 
 }//end class

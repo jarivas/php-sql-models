@@ -32,15 +32,15 @@ abstract class Generation
 
 
     /**
-     * @return null|array<string>
+     * @return bool|array<string>
      */
-    abstract protected function getTableNames(): null|array;
+    abstract protected function getTableNames(): bool|array;
 
 
     /**
-     * @return null|array<string>
+     * @return bool|array<ColumnInfo>
      */
-    abstract protected function getColumnNames(string $tableName): null|array;
+    abstract protected function getColumnsInfo(string $tableName): bool|array;
 
 
     public function process(
@@ -53,10 +53,10 @@ abstract class Generation
         null|string $password=null
     ): bool|string
     {
-        $dsn = $this->createFolder($targetFolder);
+        $result = $this->createFolder($targetFolder);
 
-        if (is_string($dsn)) {
-            return $dsn;
+        if (is_string($result)) {
+            return $result;
         }
 
         $this->targetFolder = $targetFolder.'/';
@@ -71,10 +71,10 @@ abstract class Generation
 
         $this->connect($username, $password);
 
-        $dsn = $this->generateFiles($namespace, $username, $password);
+        $result = $this->generateFiles($namespace, $username, $password);
 
-        if ($dsn) {
-            return $dsn;
+        if ($result) {
+            return $result;
         }
 
         return $this->generateClasses($namespace);
@@ -115,12 +115,12 @@ abstract class Generation
         string $namespace,
         null|string $username=null,
         null|string $password=null
-    ): null|string
+    ): bool|string
     {
         $username = is_null($username) ? 'null' : "'$username'";
         $password = is_null($password) ? 'null' : "'$password'";
 
-        $dsn = $this->generateFile(
+        $result = $this->generateFile(
             'Connection',
             [
                 '{{namespace}}',
@@ -136,7 +136,7 @@ abstract class Generation
             ]
         );
 
-        if (! $dsn) {
+        if (! $result) {
             return 'Problem generating the connection file';
         }
 
@@ -148,7 +148,7 @@ abstract class Generation
             return 'Problem generating the SqlGenerator file';
         }
 
-        return null;
+        return false;
 
     }//end generateFiles()
 
@@ -190,32 +190,32 @@ abstract class Generation
 
 
     /**
-     * @return null|array<TableInfo>
+     * @return bool|array<TableInfo>
      */
-    protected function getTablesInfo(): null|array
+    protected function getTablesInfo(): bool|array
     {
         $tableNames = $this->getTableNames();
         $columns    = [];
-        $dsn        = [];
+        $result     = [];
 
         if (is_null($tableNames)) {
             return null;
         }
 
         foreach ($tableNames as $tableName) {
-            $columns = $this->getColumnNames($tableName);
+            $columns = $this->getColumnsInfo($tableName);
 
             if ($columns) {
-                $dsn[] = new TableInfo($tableName, $columns);
+                $result[] = new TableInfo($tableName, $columns);
             }
         }
 
-        return $dsn;
+        return $result;
 
     }//end getTablesInfo()
 
 
-    protected function getClassmodelContent(string $namespace): null|string
+    protected function getClassmodelContent(string $namespace): bool|string
     {
         $content = file_get_contents($this->stubsFolder.'Class');
 
@@ -271,21 +271,23 @@ abstract class Generation
 
 
     /**
-     * @param array<string> $colNames
+     * @param array<ColumnInfo> $columnsInfo
      * @return array<string>
      */
-    protected function generateColumnsProperties(array $colNames): array
+    protected function generateColumnsProperties(array $columnsInfo): array
     {
         $columns    = '[';
         $properties = '';
+        $text       = '';
 
-        foreach ($colNames as $colName) {
-            $columns .= "\n        '$colName',";
+        foreach ($columnsInfo as $info) {
+            $columns .= "\n        '{$info->name}',";
+            $text     = $info->type.' $'.$info->name;
 
             $properties .= "    /**\n";
-            $properties .= sprintf("     * @var mixed $%s\n", $colName);
+            $properties .= "     * @var $text\n";
             $properties .= "     */\n";
-            $properties .= sprintf("    public mixed $%s;// phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps\n\n", $colName);
+            $properties .= "    public $text;// phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps\n\n";
         }
 
         $columns .= "\n    ]";

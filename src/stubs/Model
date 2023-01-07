@@ -311,7 +311,7 @@ class Model implements JsonSerializable
     /**
      * @return array<string, string>
      */
-    protected function columnsToParams(null|string $pk=null): array
+    protected function columnsToParams(bool|string $pk=null): array
     {
         $params = [];
 
@@ -349,7 +349,7 @@ class Model implements JsonSerializable
             throw new Exception('empty lastInsertId');
         }
 
-        $this->$pk = $id;
+        $this->$pk = intval($id);
 
     }//end insert()
 
