@@ -6,7 +6,7 @@ namespace SqlModels;
 
 use \PDO;
 
-class GenerationMysql extends Generation
+class GenerationPgsql extends Generation
 {
 
 
@@ -15,12 +15,14 @@ class GenerationMysql extends Generation
      */
     protected function getTableNames(): bool|array
     {
-        $stmt = $this->connection->query('SHOW TABLES');
+        $stmt = $this->connection->query(
+            "SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE';"
+        );
 
         if (!$stmt) {
             return false;
         }
-
+        
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
 
     }//end getTableNames()
@@ -32,7 +34,7 @@ class GenerationMysql extends Generation
     protected function getColumnsInfo(string $tableName): bool|array
     {
         $columns = [];
-        $stmt    = $this->connection->query("DESC `$tableName`");
+        $stmt    = $this->connection->query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '$tableName';");
 
         if (!$stmt) {
             return false;
@@ -45,8 +47,8 @@ class GenerationMysql extends Generation
         }
 
         foreach ($result as $info) {
-            $name = $info['Field'];
-            $type = $this->convertType($info['Type']);
+            $name = $info['column_name'];
+            $type = $this->convertType($info['data_type']);
 
             $columns[] = new ColumnInfo($name, $type);
         }
@@ -58,7 +60,9 @@ class GenerationMysql extends Generation
 
     protected function convertType(string $type): string
     {
-        if (str_contains($type, 'int')) {
+        if (str_contains($type, 'int')
+        || str_contains($type, 'serial')
+        ) {
             return PhpTypes::Integer->value;
         }
 
@@ -66,9 +70,9 @@ class GenerationMysql extends Generation
         || str_contains($type, 'text')
         || str_contains($type, 'date')
         || str_contains($type, 'time')
-        || str_contains($type, 'year')
+        || str_contains($type, 'interval')
         || str_contains($type, 'enum')
-        || str_contains($type, 'set')) {
+        ) {
             return PhpTypes::String->value;
         }
 
@@ -82,6 +86,7 @@ class GenerationMysql extends Generation
         || str_contains($type, 'float')
         || str_contains($type, 'numeric')
         || str_contains($type, 'decimal')
+        || str_contains($type, 'money')
         ) {
             return PhpTypes::Float->value;
         }

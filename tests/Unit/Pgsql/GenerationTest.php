@@ -2,26 +2,26 @@
 
 declare(strict_types=1);
 
-namespace SqlModels\Tests\Unit\Mysql;
+namespace SqlModels\Tests\Unit\Pgsql;
 
 use PHPUnit\Framework\TestCase;
-use SqlModels\GenerationMysql;
+use SqlModels\GenerationPgsql;
 use SqlModels\Dbms;
 
 class GenerationTest extends TestCase
 {
-    public const NAMESPACE = 'SqlModels\Tests\Mysql\Models';
+    public const NAMESPACE = 'SqlModels\Tests\Pgsql\Models';
 
 
-    public function testGenerateOk(): void
+    public function testGeneratePOk(): void
     {
         $dir          = dirname(__DIR__, 2);
-        $targetFolder = "$dir/Mysql/Models";
-        $generation   = new GenerationMysql();
+        $targetFolder = "$dir/Pgsql/Models";
+        $generation   = new GenerationPgsql();
 
         $result = $generation->process(
-            Dbms::Mysql,
-            $_ENV['MYSQL_HOST'],
+            Dbms::Pgsql,
+            $_ENV['PGSQL_HOST'],
             $_ENV['MYSQL_DATABASE'],
             $targetFolder,
             self::NAMESPACE,

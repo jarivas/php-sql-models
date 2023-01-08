@@ -19,13 +19,13 @@ class GenerationSqlite extends Generation
         $stmt   = $this->connection->query('SELECT name FROM sqlite_master WHERE type = "table"');
 
         if (!$stmt) {
-            return null;
+            return false;
         }
 
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (! $result) {
-            return null;
+            return false;
         }
 
         foreach ($result as $fielDesc) {
@@ -46,13 +46,13 @@ class GenerationSqlite extends Generation
         $stmt    = $this->connection->query("PRAGMA table_info($tableName);");
 
         if (!$stmt) {
-            return null;
+            return false;
         }
 
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (! $result) {
-            return null;
+            return false;
         }
 
         foreach ($result as $info) {

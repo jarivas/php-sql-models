@@ -13,3 +13,11 @@ services:
             - MYSQL_PASSWORD=$MYSQL_PASSWORD
         volumes:
             - ./db/Mysql:/docker-entrypoint-initdb.d
+    postgres:
+        image: postgres
+        environment:
+            - POSTGRES_DB=$MYSQL_DATABASE
+            - POSTGRES_USER=$MYSQL_USER
+            - POSTGRES_PASSWORD=$MYSQL_PASSWORD
+        volumes:
+            - ./db/Postgres:/docker-entrypoint-initdb.d

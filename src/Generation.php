@@ -30,6 +30,16 @@ abstract class Generation
      */
     protected string $dsn;
 
+    /**
+     * @var Dbms $type
+     */
+    protected Dbms $type;
+
+    /**
+     * @var string $dbName
+     */
+    protected string $dbName;
+
 
     /**
      * @return bool|array<string>
@@ -46,13 +56,16 @@ abstract class Generation
     public function process(
         Dbms $type,
         string $host,
-        string $dbname,
+        string $dbName,
         string $targetFolder,
         string $namespace,
         null|string $username=null,
         null|string $password=null
     ): bool|string
     {
+        $this->type   = $type;
+        $this->dbName = $dbName;
+
         $result = $this->createFolder($targetFolder);
 
         if (is_string($result)) {
@@ -63,7 +76,7 @@ abstract class Generation
 
         $this->stubsFolder = $this->getStubsFolder();
 
-        $this->dsn = $this->generateDsn($type, $host, $dbname);
+        $this->dsn = $this->generateDsn($host);
 
         if (! $this->stubsFolder) {
             return 'Problem on getStubsFolder';
@@ -82,14 +95,14 @@ abstract class Generation
     }//end process()
 
 
-    protected function generateDsn(Dbms $type, string $host, string $dbname): string
+    protected function generateDsn(string $host): string
     {
         $dsn = '';
 
-        if ($type == Dbms::Sqlite) {
-            $dsn = "sqlite:$host/$dbname";
+        if ($this->type == Dbms::Sqlite) {
+            $dsn = "sqlite:$host/{$this->dbName}";
         } else {
-            $dsn = "{$type->value}:dbname=$dbname;host=$host";
+            $dsn = "{$this->type->value}:host=$host;dbname={$this->dbName}";
         }
 
         return $dsn;
@@ -199,7 +212,7 @@ abstract class Generation
         $result     = [];
 
         if (is_null($tableNames)) {
-            return null;
+            return false;
         }
 
         foreach ($tableNames as $tableName) {
@@ -220,7 +233,7 @@ abstract class Generation
         $content = file_get_contents($this->stubsFolder.'Class');
 
         if (! $content) {
-            return null;
+            return false;
         }
 
         return str_replace('{{namespace}}', $namespace, $content);

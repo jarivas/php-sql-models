@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace {{namespace}};
+namespace SqlModels\Tests\Pgsql\Models;
 
 use Exception;
 use PDO;
@@ -16,7 +16,7 @@ class Connection {
     /**
      * @var string $dsn
      */
-    private string $dsn = '{{dsn}}';
+    private string $dsn = 'pgsql:host=postgres;dbname=Chinook';
 
     /**
      * @var PDO $db
@@ -26,12 +26,12 @@ class Connection {
     /**
      * @var null|string $username
      */
-    private null|string $username = '{{username}}';
+    private null|string $username = 'Chinook';
 
     /**
      * @var null|string $password
      */
-    private null|string $password = '{{password}}';
+    private null|string $password = 'Chinook';
 
 
     public static function getInstance() : Connection
