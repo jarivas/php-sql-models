@@ -13,7 +13,7 @@ class ModelPgTest extends TestCase
 {
 
 
-    public function testGetOk(): void
+    public function testGetPgOk(): void
     {
         $model = new Album();
 
@@ -103,7 +103,7 @@ class ModelPgTest extends TestCase
 
     public function testUpdate(): void
     {
-        Connection::getInstance()->executeSql('DELETE FROM Album WHERE Title = :Title', ['Title' => __FUNCTION__]);
+        Connection::getInstance()->executeSql('DELETE FROM Album WHERE "Title" = :Title', ['Title' => __FUNCTION__]);
 
         $album = $this->testCreate();
 
@@ -123,7 +123,7 @@ class ModelPgTest extends TestCase
 
     public function testDelete(): void
     {
-        Connection::getInstance()->executeSql('DELETE FROM Album WHERE Title = :Title', ['Title' => __FUNCTION__]);
+        Connection::getInstance()->executeSql('DELETE FROM Album WHERE "Title" = :Title', ['Title' => __FUNCTION__]);
 
         $album = $this->testCreate();
 

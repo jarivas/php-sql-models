@@ -12,6 +12,11 @@ class {{class_name}} extends Model
 {
 
     /**
+     * @var Dbms $type
+     */
+    protected static Dbms $type = Dbms::{{type}};
+
+    /**
      * @var string $tableName
      */
     protected static string $tableName = '{{table_name}}';

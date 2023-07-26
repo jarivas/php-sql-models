@@ -4,8 +4,14 @@
          bootstrap="tests/Unit/autoload.php"
          colors="true">
     <testsuites>
-        <testsuite name="Unit">
-            <directory suffix="Test.php">./tests/Unit</directory>
+        <testsuite name="Mysql">
+            <directory suffix="Test.php">./tests/Unit/Mysql</directory>
+        </testsuite>
+        <testsuite name="Pgsql">
+            <directory suffix="Test.php">./tests/Unit/Pgsql</directory>
+        </testsuite>
+        <testsuite name="Sqlite">
+            <directory suffix="Test.php">./tests/Unit/Sqlite</directory>
         </testsuite>
     </testsuites>
     <logging>

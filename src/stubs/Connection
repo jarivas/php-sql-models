@@ -60,7 +60,6 @@ class Connection {
      */
     public function get(string $sql, bool|array $params, string $className): bool|array
     {
-        echo PHP_EOL.$sql.PHP_EOL.print_r($params, true).PHP_EOL;
         $stmt = $this->db->prepare($sql);
 
         try {
@@ -82,7 +81,6 @@ class Connection {
      */
     public function executeSql(string $sql, bool|array $params=null): void
     {
-        echo PHP_EOL.$sql.PHP_EOL.print_r($params, true).PHP_EOL;
         $stmt = $this->db->prepare($sql);
 
         try {

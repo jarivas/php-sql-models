@@ -161,6 +161,10 @@ abstract class Generation
             return 'Problem generating the SqlGenerator file';
         }
 
+        if (! $this->generateDbms($namespace)) {
+            return 'Problem generating the Dbms file';
+        }
+
         return false;
 
     }//end generateFiles()
@@ -228,6 +232,10 @@ abstract class Generation
     }//end getTablesInfo()
 
 
+    /**
+     * @param string $namespace
+     * @return bool|string
+     */
     protected function getClassmodelContent(string $namespace): bool|string
     {
         $content = file_get_contents($this->stubsFolder.'Class');
@@ -266,12 +274,14 @@ abstract class Generation
                         '{{table_name}}',
                         '{{columns}}',
                         '{{properties}}',
+                        '{{type}}',
                     ],
                     [
                         $fileName,
                         $tableName,
                         $columns,
                         $properties,
+                        ucfirst($this->type->value),
                     ],
                     $modelContent
                 );
@@ -311,6 +321,23 @@ abstract class Generation
         ];
 
     }//end generateColumnsProperties()
+
+
+    /**
+     * @param string $namespace
+     * @return bool
+     */
+    protected function generateDbms(string $namespace): bool
+    {
+
+        $fileName    = 'Dbms.php';
+        $newFileName = $this->targetFolder.$fileName;
+        $fileName    = dirname($this->stubsFolder, 1).'/'.$fileName;
+        $namespace   = "namespace $namespace;";
+
+        return $this->copyReplace($fileName, $newFileName, ['namespace SqlModels;'], [$namespace]);
+
+    }//end generateDbms()
 
 
 }//end class
