@@ -304,8 +304,9 @@ abstract class Generation
         $text       = '';
 
         foreach ($columnsInfo as $info) {
+            $nullable = $info->nullable ? '?' : '';
             $columns .= "\n        '{$info->name}',";
-            $text     = $info->type.' $'.$info->name;
+            $text     = $nullable.$info->type.' $'.$info->name;
 
             $properties .= "    /**\n";
             $properties .= "     * @var $text\n";

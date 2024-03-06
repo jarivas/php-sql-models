@@ -51,6 +51,8 @@ class SqlGenerator
 
         $of = self::generateOffsset($offset);
 
+        $tableName = ($type != Dbms::Pgsql) ? $tableName : '"'.$tableName.'"';
+
         return "SELECT $c FROM $tableName $j$w$g$h$o$l$of";
 
     }//end generateSelect()
@@ -71,6 +73,8 @@ class SqlGenerator
         $cols    = array_keys($params);
         $columns = self::generateColumns($type, $cols);
         $values  = self::generateValues($cols);
+
+        $tableName = ($type != Dbms::Pgsql) ? $tableName : '"'.$tableName.'"';
 
         return "INSERT INTO $tableName ($columns) VALUES (:$values);";
 
@@ -103,6 +107,8 @@ class SqlGenerator
 
         $l = ($limit > 0) ? self::generateLimit($limit): '';
 
+        $tableName = ($type != Dbms::Pgsql) ? $tableName : '"'.$tableName.'"';
+
         return "UPDATE $tableName SET $s$w$o$l";
 
     }//end generateUpdate()
@@ -131,6 +137,8 @@ class SqlGenerator
         $o = self::generateOrderBy($type, $orderBy);
 
         $l = ($limit > 0) ? self::generateLimit($limit): '';
+
+        $tableName = ($type != Dbms::Pgsql) ? $tableName : '"'.$tableName.'"';
 
         return "DELETE FROM $tableName $w";
 

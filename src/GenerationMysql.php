@@ -48,7 +48,7 @@ class GenerationMysql extends Generation
             $name = $info['Field'];
             $type = $this->convertType($info['Type']);
 
-            $columns[] = new ColumnInfo($name, $type);
+            $columns[] = new ColumnInfo($name, $type, $info['Null'] != 'NO');
         }
 
         return $columns;

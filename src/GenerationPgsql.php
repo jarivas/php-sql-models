@@ -34,7 +34,7 @@ class GenerationPgsql extends Generation
     protected function getColumnsInfo(string $tableName): bool|array
     {
         $columns = [];
-        $stmt    = $this->connection->query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = '$tableName';");
+        $stmt    = $this->connection->query("SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = '$tableName';");
 
         if (!$stmt) {
             return false;
@@ -50,7 +50,7 @@ class GenerationPgsql extends Generation
             $name = $info['column_name'];
             $type = $this->convertType($info['data_type']);
 
-            $columns[] = new ColumnInfo($name, $type);
+            $columns[] = new ColumnInfo($name, $type, $info['is_nullable'] != 'NO');
         }
 
         return $columns;

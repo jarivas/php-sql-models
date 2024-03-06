@@ -59,7 +59,7 @@ class GenerationSqlite extends Generation
             $name = $info['name'];
             $type = $this->convertType($info['type']);
 
-            $columns[] = new ColumnInfo($name, $type);
+            $columns[] = new ColumnInfo($name, $type, $info['notnull'] != '1');
         }
 
         return $columns;

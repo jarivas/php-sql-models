@@ -3,18 +3,10 @@ services:
         build: .
         volumes:
             - .:/app
-    mysql:
-        image: mariadb
-        environment:
-            - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
-            - MYSQL_ROOT_HOST=$MYSQL_ROOT_HOST
-            - MYSQL_DATABASE=$MYSQL_DATABASE
-            - MYSQL_USER=$MYSQL_USER
-            - MYSQL_PASSWORD=$MYSQL_PASSWORD
-        volumes:
-            - ./db/Mysql:/docker-entrypoint-initdb.d
     postgres:
         image: postgres
+        ports:
+            - 5432:5432
         environment:
             - POSTGRES_DB=$MYSQL_DATABASE
             - POSTGRES_USER=$MYSQL_USER
