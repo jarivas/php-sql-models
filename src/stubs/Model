@@ -115,7 +115,7 @@ class Model implements JsonSerializable
             return;
         }
 
-        foreach($columns as $colum) {
+        foreach($columns as $column) {
             if (in_array($column, static::$columns)) {
                 $this->selectedColumns = $colum;
             }
