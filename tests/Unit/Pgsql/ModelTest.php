@@ -11,6 +11,27 @@ use SqlModels\Tests\Pgsql\Models\Connection;
 
 class ModelPgTest extends TestCase
 {
+    public function testSetValuesPOk(): void
+    {
+        $id = (time() + rand(1, 100));
+
+        $columnValues = [
+            'Title' => __FUNCTION__.$id,
+            'AlbumId' => $id,
+            'ArtistId' => 1
+        ];
+
+        $album = new Album($columnValues);
+
+        $album->save(null);
+
+        $album2 = Album::first(['AlbumId' => $id]);
+
+        $this->assertNotFalse($album2);
+        $this->assertInstanceOf(Album::class, $album2);
+
+        $this->assertSame(intval($album->AlbumId), $album2->AlbumId);
+    }
 
 
     public function testGetPgOk(): void
