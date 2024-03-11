@@ -13,7 +13,7 @@ class GenerationTest extends TestCase
     public const NAMESPACE = 'SqlModels\Tests\Pgsql\Models';
 
 
-    public function testGeneratePOk(): void
+    public function testGenerateOk(): void
     {
         $dir          = dirname(__DIR__, 2);
         $targetFolder = "$dir/Pgsql/Models";

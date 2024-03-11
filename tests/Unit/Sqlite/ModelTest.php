@@ -11,7 +11,7 @@ use SqlModels\Tests\Sqlite\Models\Connection;
 
 class ModelTest extends TestCase
 {
-    public function testSetValuesSOk(): void
+    public function testSetValuesOk(): void
     {
         $id = (time() + rand(1, 100));
 
@@ -22,22 +22,15 @@ class ModelTest extends TestCase
         ];
 
         $album = new Album($columnValues);
+        
+        $data = $album->toArray();
 
-        $album->save(null);
-
-        $album2 = Album::first(['AlbumId' => $id]);
-
-        $this->assertNotFalse($album2);
-        $this->assertInstanceOf(Album::class, $album2);
-
-        $this->assertSame(intval($album->AlbumId), $album2->AlbumId);
+        $this->assertEquals($columnValues, $data);
     }
 
     public function testGetOk(): void
     {
-        $model = new Album();
-
-        $albums = $model->get();
+        $albums = Album::get();
 
         $this->assertIsArray($albums);
 
@@ -46,30 +39,9 @@ class ModelTest extends TestCase
     }//end testGetOk()
 
 
-    public function testGetOne(): void
-    {
-        $model  = new Album();
-        $albums = $model->get();
-
-        $this->assertIsArray($albums);
-
-        $model->where('Title', '=', $albums[0]->Title);
-
-        $album = $model->getOne();
-
-        $this->assertNotFalse($album);
-
-        $this->assertInstanceOf(Album::class, $album);
-
-        $this->assertSame($albums[0]->Title, $album->Title);
-
-    }//end testGetOne()
-
-
     public function testFirst(): void
     {
-        $model  = new Album();
-        $albums = $model->get();
+        $albums = Album::get();
 
         $this->assertIsArray($albums);
 
@@ -86,37 +58,38 @@ class ModelTest extends TestCase
     {
         $model = new Album();
 
-        $model->select(['Title', 'AlbumId']);
-        $album = $model->getOne();
+        $model->select(['Title']);
+        $model->hydrate();
 
-        $this->assertNotFalse($album);
-        $this->assertInstanceOf(Album::class, $album);
+        $this->assertNotFalse($model);
+        $this->assertInstanceOf(Album::class, $model);
 
-        $this->assertNotEmpty($album->Title);
-        $this->assertNotEmpty($album->AlbumId);
+        $data = $model->toArray();
+
+        $this->assertNotEmpty($data['Title']);
+        $this->assertTrue(empty($data['AlbumId']));
+        $this->assertTrue(empty($data['ArtistId']));
 
     }//end testSelect()
 
 
     public function testCreate(): Album
     {
-        $model  = new Album();
-        $albums = $model->get();
+        $album = new Album();
+        $id = (time() + rand(1, 100));
 
-        $this->assertIsArray($albums);
+        $album->Title    = __FUNCTION__.$id;
+        $album->AlbumId  = $id;
+        $album->ArtistId = 1;
 
-        $album = Album::first(['Title' => $albums[0]->Title]);
+        $album->save(null);
 
-        $this->assertNotFalse($album);
-        $this->assertInstanceOf(Album::class, $album);
+        $album2 = Album::first(['AlbumId' => $id]);
 
-        unset($album->AlbumId);
+        $this->assertNotFalse($album2);
+        $this->assertInstanceOf(Album::class, $album2);
 
-        $album->Title .= microtime();
-
-        $album->save('AlbumId');
-
-        $this->assertNotEmpty($album->AlbumId);
+        $this->assertSame(intval($album->AlbumId), $album2->AlbumId);
 
         return $album;
 

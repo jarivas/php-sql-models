@@ -9,9 +9,9 @@ use SqlModels\Tests\Pgsql\Models\Album;
 use SqlModels\Tests\Pgsql\Models\Connection;
 
 
-class ModelPgTest extends TestCase
+class ModelTest extends TestCase
 {
-    public function testSetValuesPOk(): void
+    public function testSetValuesOk(): void
     {
         $id = (time() + rand(1, 100));
 
@@ -22,23 +22,15 @@ class ModelPgTest extends TestCase
         ];
 
         $album = new Album($columnValues);
+        
+        $data = $album->toArray();
 
-        $album->save(null);
-
-        $album2 = Album::first(['AlbumId' => $id]);
-
-        $this->assertNotFalse($album2);
-        $this->assertInstanceOf(Album::class, $album2);
-
-        $this->assertSame(intval($album->AlbumId), $album2->AlbumId);
+        $this->assertEquals($columnValues, $data);
     }
 
-
-    public function testGetPgOk(): void
+    public function testGetOk(): void
     {
-        $model = new Album();
-
-        $albums = $model->get();
+        $albums = Album::get();
 
         $this->assertIsArray($albums);
 
@@ -47,30 +39,9 @@ class ModelPgTest extends TestCase
     }//end testGetOk()
 
 
-    public function testGetOne(): void
-    {
-        $model  = new Album();
-        $albums = $model->get();
-
-        $this->assertIsArray($albums);
-
-        $model->where('Title', '=', $albums[0]->Title);
-
-        $album = $model->getOne();
-
-        $this->assertNotFalse($album);
-
-        $this->assertInstanceOf(Album::class, $album);
-
-        $this->assertSame($albums[0]->Title, $album->Title);
-
-    }//end testGetOne()
-
-
     public function testFirst(): void
     {
-        $model  = new Album();
-        $albums = $model->get();
+        $albums = Album::get();
 
         $this->assertIsArray($albums);
 
@@ -87,14 +58,17 @@ class ModelPgTest extends TestCase
     {
         $model = new Album();
 
-        $model->select(['Title', 'AlbumId']);
-        $album = $model->getOne();
+        $model->select(['Title']);
+        $model->hydrate();
 
-        $this->assertNotFalse($album);
-        $this->assertInstanceOf(Album::class, $album);
+        $this->assertNotFalse($model);
+        $this->assertInstanceOf(Album::class, $model);
 
-        $this->assertNotEmpty($album->Title);
-        $this->assertNotEmpty($album->AlbumId);
+        $data = $model->toArray();
+
+        $this->assertNotEmpty($data['Title']);
+        $this->assertTrue(empty($data['AlbumId']));
+        $this->assertTrue(empty($data['ArtistId']));
 
     }//end testSelect()
 
@@ -119,7 +93,7 @@ class ModelPgTest extends TestCase
 
         return $album;
 
-    }//end testCreateMy()
+    }//end testCreate()
 
 
     public function testUpdate(): void

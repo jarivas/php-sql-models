@@ -13,7 +13,7 @@ class GenerationTest extends TestCase
     public const NAMESPACE = 'SqlModels\Tests\Mysql\Models';
 
 
-    public function testGenerateMOk(): void
+    public function testGenerateOk(): void
     {
         $dir          = dirname(__DIR__, 2);
         $targetFolder = "$dir/Mysql/Models";
