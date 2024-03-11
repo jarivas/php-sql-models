@@ -117,7 +117,7 @@ class Model implements JsonSerializable
 
         foreach($columns as $column) {
             if (in_array($column, static::$columns)) {
-                $this->selectedColumns = $colum;
+                $this->selectedColumns = $column;
             }
         }
 
