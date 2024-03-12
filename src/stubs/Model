@@ -75,7 +75,7 @@ class Model implements JsonSerializable
 
         $new->setValues($columnValues, true);
 
-        $rows = $new->query();
+        $rows = $new->query(false);
 
         if (! is_array($rows) || empty($rows)) {
             return false;
@@ -347,7 +347,7 @@ class Model implements JsonSerializable
     /**
      * @return bool|array<static> array of current model
      */
-    protected function query(): mixed
+    protected function query(bool $resetFilter = true): mixed
     {
         $cols   = static::$columns;
         $params = [];
@@ -372,7 +372,9 @@ class Model implements JsonSerializable
             $this->offset
         );
 
-        $this->resetFilters();
+        if ($resetFilter) {
+            $this->resetFilters();
+        }        
 
         return Connection::getInstance()->get($sql, $params, static::class);
 
