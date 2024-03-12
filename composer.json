@@ -1,6 +1,6 @@
 {
     "name": "jarivas/sql-models",
-    "version": "1.6.5",
+    "version": "1.6.6",
     "description": "A simple and light Multi Sql model factory",
     "type": "library",
     "license": "MIT",

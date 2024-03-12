@@ -185,14 +185,11 @@ class Model implements JsonSerializable
     /**
      * @param string $column
      * @param string $operator
+     * @param string $operator
      */
-    public function where(string $column, string $operator): void
+    public function where(string $column, string $operator, mixed $value = null): void
     {
-        $this->where[] = [
-            'condition_operator' => 'AND',
-            'column'             => $column,
-            'operator'           => $operator,
-        ];
+        $this->where[] = $this->whereHelper('AND', $column, $operator, $value);
 
     }//end where()
 
@@ -200,13 +197,9 @@ class Model implements JsonSerializable
      * @param string $column
      * @param string $operator
      */
-    public function whereOr(string $column, string $operator): void
+    public function whereOr(string $column, string $operator, mixed $value = null): void
     {
-        $this->where[] = [
-            'condition_operator' => 'OR',
-            'column'             => $column,
-            'operator'           => $operator
-        ];
+        $this->where[] = $this->whereHelper('OR', $column, $operator, $value);
 
     }//end whereOr()
 
@@ -214,13 +207,9 @@ class Model implements JsonSerializable
      * @param string $column
      * @param string $operator
      */
-    public function having(string $column, string $operator): void
+    public function having(string $column, string $operator, mixed $value = null): void
     {
-        $this->having[] = [
-            'condition_operator' => 'AND',
-            'column'             => $column,
-            'operator'           => $operator,
-        ];
+        $this->having[] = $this->whereHelper('AND', $column, $operator, $value);
 
     }//end having()
 
@@ -229,13 +218,9 @@ class Model implements JsonSerializable
      * @param string $operator
      * @param mixed $value
      */
-    public function havingOr(string $column, string $operator): void
+    public function havingOr(string $column, string $operator, mixed $value = null): void
     {
-        $this->having[] = [
-            'condition_operator' => 'OR',
-            'column'             => $column,
-            'operator'           => $operator
-        ];
+        $this->having[] = $this->whereHelper('OR', $column, $operator, $value);
 
     }//end havingOr()
 
@@ -303,6 +288,50 @@ class Model implements JsonSerializable
     }//end delete()
 
     /**
+     * @param bool $resetFilter
+     * @param bool $debug
+     * 
+     * @return bool|array<static> array of current model
+     */
+    public function query(bool $resetFilter = true, bool $debug = false): mixed
+    {
+        $cols   = static::$columns;
+        $params = [];
+
+        if (! empty($this->selectedColumns)) {
+            $cols = $this->selectedColumns;
+
+            $this->selectedColumns = [];
+        }
+
+        $sql = SqlGenerator::generateSelect(
+            static::$type,
+            static::$tableName,
+            $params,
+            $cols,
+            $this->joins,
+            $this->criteriaHelper($this->where),
+            $this->groupBy,
+            $this->criteriaHelper($this->having),
+            $this->order,
+            $this->limit,
+            $this->offset
+        );
+
+        if ($resetFilter) {
+            $this->resetFilters();
+        }
+
+        if ($debug) {
+            error_log($sql);
+            error_log(print_r($params, true));
+        }
+
+        return Connection::getInstance()->get($sql, $params, static::class);
+
+    }//end get()
+
+    /**
      * @param string|null $pk on tables with primary no autoincrement, please use null
      */
     public function save(string|null $pk = 'id'): void
@@ -356,40 +385,20 @@ class Model implements JsonSerializable
     }//end toArray()
 
     /**
-     * @return bool|array<static> array of current model
+     * @param string $conditionOperator
+     * @param string $column
+     * @param string $operator
+     * @param mixed $value
      */
-    protected function query(bool $resetFilter = true): mixed
+    protected function whereHelper(string $conditionOperator, string $column, string $operator, mixed $value): array
     {
-        $cols   = static::$columns;
-        $params = [];
-
-        if (! empty($this->selectedColumns)) {
-            $cols = $this->selectedColumns;
-
-            $this->selectedColumns = [];
-        }
-
-        $sql = SqlGenerator::generateSelect(
-            static::$type,
-            static::$tableName,
-            $params,
-            $cols,
-            $this->joins,
-            $this->criteriaHelper($this->where),
-            $this->groupBy,
-            $this->criteriaHelper($this->having),
-            $this->order,
-            $this->limit,
-            $this->offset
-        );
-
-        if ($resetFilter) {
-            $this->resetFilters();
-        }        
-
-        return Connection::getInstance()->get($sql, $params, static::class);
-
-    }//end get()
+        return [
+            'condition_operator' => $conditionOperator,
+            'column' => $column,
+            'operator' => $operator,
+            'value'=> $value
+        ];
+    }
 
     /**
      * @return array<string, mixed>
@@ -470,7 +479,9 @@ class Model implements JsonSerializable
         foreach($criteria as $c) {
             $field = $c['column'];
             
-            $c['value'] = $this->$field;
+            if (empty($c['value'])) {
+                $c['value'] = $this->$field;
+            }            
             
             $result[] = $c;
         }
