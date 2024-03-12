@@ -87,12 +87,17 @@ class Model implements JsonSerializable
 
     /**
      * @param array<string, string> $columnValues
+     * @param int $offset
+     * @param int $limit
+     * @param array<string> $columns
      * @return bool|array bool|array<static>
      */
-    public static function get(array $columnValues = [], int $offset = 0, int $limit = 100): mixed
+    public static function get(array $columnValues = [], int $offset = 0, int $limit = 100, array $columns = []): mixed
     {
         // @phpstan-ignore-next-line
         $new = new static();
+
+        $new->select($columns);
 
         $new->setValues($columnValues, true);
 
@@ -313,7 +318,9 @@ class Model implements JsonSerializable
     {
         $this->limit = 1;
         $this->offset = 0;
-        $this->where($pk, '=');
+        if ($pk) {
+            $this->where($pk,'=');
+        }
 
         $rows = $this->query(false);
 

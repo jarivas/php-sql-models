@@ -29,11 +29,19 @@ class ModelTest extends TestCase
 
     public function testGetOk(): void
     {
-        $albums = Album::get();
+        $albums = Album::get([], 0, 1, ['Title']);
 
         $this->assertIsArray($albums);
 
-        $this->assertInstanceOf(Album::class, $albums[0]);
+        $model = $albums[0];
+
+        $this->assertInstanceOf(Album::class, $model);
+
+        $data = $model->toArray();
+
+        $this->assertNotEmpty($data['Title']);
+        $this->assertTrue(empty($data['AlbumId']));
+        $this->assertTrue(empty($data['ArtistId']));
 
     }//end testGetOk()
 
@@ -58,7 +66,7 @@ class ModelTest extends TestCase
         $model = new Album();
 
         $model->select(['Title']);
-        $model->hydrate();
+        $model->hydrate(null);
 
         $this->assertNotFalse($model);
         $this->assertInstanceOf(Album::class, $model);
