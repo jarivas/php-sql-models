@@ -10,14 +10,14 @@ class {{class_name}} extends Model
 {
 
     /**
+     * @var string $tableName
+     */
+    public static string $tableName = '{{table_name}}';
+
+    /**
      * @var Dbms $type
      */
     protected static Dbms $type = Dbms::{{type}};
-
-    /**
-     * @var string $tableName
-     */
-    protected static string $tableName = '{{table_name}}';
 
     /**
      * @var array<string> $columns

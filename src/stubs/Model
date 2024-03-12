@@ -8,16 +8,16 @@ use JsonSerializable;
 
 class Model implements JsonSerializable
 {
+    
+    /**
+     * @var string $tableName
+     */
+    public static string $tableName = '';
 
     /**
      * @var Dbms $type
      */
     protected static Dbms $type;
-    
-    /**
-     * @var string $tableName
-     */
-    protected static string $tableName = '';
 
     /**
      * @var array<string> $columns
@@ -166,15 +166,15 @@ class Model implements JsonSerializable
     }//end select()
 
     /**
-     * @param string $type
+     * @param Join $type
      * @param string $tableName
      * @param string $onCol1
      * @param string $onCol2
      */
-    public function join(string $type, string $tableName, string $onCol1, string $onCol2): void
+    public function join(Join $type, string $tableName, string $onCol1, string $onCol2): void
     {
         $this->joins[] = [
-            'type'      => $type,
+            'type'      => $type->value,
             'tableName' => $tableName,
             'onCol1'    => $onCol1,
             'onCol2'    => $onCol2,

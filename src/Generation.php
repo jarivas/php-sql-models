@@ -161,8 +161,8 @@ abstract class Generation
             return 'Problem generating the SqlGenerator file';
         }
 
-        if (! $this->generateDbms($namespace)) {
-            return 'Problem generating the Dbms file';
+        if (! $this->generateEnum($namespace)) {
+            return 'Problem generating the enum files';
         }
 
         return false;
@@ -328,17 +328,27 @@ abstract class Generation
      * @param string $namespace
      * @return bool
      */
-    protected function generateDbms(string $namespace): bool
+    protected function generateEnum(string $namespace): bool
     {
+        $files = ['Dbms.php', 'Join.php'];
+        $fileName = '';
+        $i = 0;
+        $max = count($files);
+        $next = false;
+        $namespace = "namespace $namespace;";
+        
+        do {
+            $fileName = $files[$i];
+            $newFileName = $this->targetFolder.$fileName;
+            $fileName = dirname($this->stubsFolder, 1).'/'.$fileName;
+                
+            $next = $this->copyReplace($fileName, $newFileName, ['namespace SqlModels;'], [$namespace]);
+            ++$i;
+        }while($i < $max && $next);
 
-        $fileName    = 'Dbms.php';
-        $newFileName = $this->targetFolder.$fileName;
-        $fileName    = dirname($this->stubsFolder, 1).'/'.$fileName;
-        $namespace   = "namespace $namespace;";
+        return $next;
 
-        return $this->copyReplace($fileName, $newFileName, ['namespace SqlModels;'], [$namespace]);
-
-    }//end generateDbms()
+    }//end generateEnum()
 
 
 }//end class
