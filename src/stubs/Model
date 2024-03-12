@@ -306,12 +306,16 @@ class Model implements JsonSerializable
 
     }//end save()
 
-    public function hydrate(): void
+    /**
+     * @param string|null $pk on tables with primary no autoincrement, please use null
+     */
+    public function hydrate(string|null $pk = 'id'): void
     {
         $this->limit = 1;
         $this->offset = 0;
+        $this->where($pk, '=');
 
-        $rows = $this->query();
+        $rows = $this->query(false);
 
         if (! is_bool($rows)) {
             $this->setValues($rows[0]->toArray());
@@ -434,7 +438,7 @@ class Model implements JsonSerializable
     {
         $params = $this->columnsToParams($pk);
 
-        $this->where($pk, '=', $this->$pk);
+        $this->where($pk, '=');
 
         $sql = SqlGenerator::generateUpdate(static::$type, static::$tableName, $params, $this->criteriaHelper($this->where));
 
