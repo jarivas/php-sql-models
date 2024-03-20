@@ -65,7 +65,7 @@ class Model implements JsonSerializable
     protected int $offset = 0;
 
     /**
-     * @param array<string, string> $columnValues
+     * @param array<string, mixed> $columnValues
      * @return bool|static
      */
     public static function first(array $columnValues = []): mixed
@@ -86,7 +86,7 @@ class Model implements JsonSerializable
     }//end first()
 
     /**
-     * @param array<string, string> $columnValues
+     * @param array<string, mixed> $columnValues
      * @param int $offset
      * @param int $limit
      * @param array<string> $columns
