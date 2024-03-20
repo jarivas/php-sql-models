@@ -330,7 +330,7 @@ abstract class Generation
      */
     protected function generateEnum(string $namespace): bool
     {
-        $files = ['Dbms.php', 'Join.php'];
+        $files = ['Dbms.php', 'Join.php', 'Logger.php'];
         $fileName = '';
         $i = 0;
         $max = count($files);

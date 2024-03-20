@@ -1,6 +1,6 @@
 {
     "name": "jarivas/sql-models",
-    "version": "1.6.8.2",
+    "version": "1.6.9",
     "description": "A simple and light Multi Sql model factory",
     "type": "library",
     "license": "MIT",
@@ -24,5 +24,8 @@
         "phpstan/phpstan": "*",
         "squizlabs/php_codesniffer": "3.*",
         "symfony/var-dumper": "^6.2"
+    },
+    "require": {
+        "psr/log": "^3.0"
     }
 }

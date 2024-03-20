@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace {{namespace}};
 
+use Psr\Log\LoggerInterface;
 use Exception;
 use PDO;
 
@@ -33,6 +34,11 @@ class Connection {
      */
     private null|string $password = '{{password}}';
 
+    /**
+     * @var LoggerInterface $logger
+     */
+    protected LoggerInterface $logger;
+
 
     public static function getInstance() : Connection
     {
@@ -45,21 +51,25 @@ class Connection {
     }//end getInstance()
 
 
-    private function __construct()
+    private function __construct(LoggerInterface|null $logger = null)
     {
         $this->db = new PDO($this->dsn, $this->username, $this->password);
+
+        $this->logger = (is_null($logger)) ? new Logger() : $logger;
 
     }//end __construct()
 
 
     /**
      * @param string $sql
-     * @param bool|array<string, string> $params
+     * @param bool|array<string, mixed> $params
      * @param string $className
      * @return bool|array<mixed> array of $className
      */
     public function get(string $sql, bool|array $params, string $className): bool|array
     {
+        $this->log($sql, $params);
+        
         $stmt = $this->db->prepare($sql);
 
         try {
@@ -79,8 +89,10 @@ class Connection {
      * @param string $sql
      * @param bool|array<string, string> $params
      */
-    public function executeSql(string $sql, bool|array $params=null): void
+    public function executeSql(string $sql, bool|array $params=false): void
     {
+        $this->log($sql, $params);
+
         $stmt = $this->db->prepare($sql);
 
         try {
@@ -99,6 +111,8 @@ class Connection {
      */
     public function exec(string $sql): void
     {
+        $this->log($sql);
+
         if (! $this->db->exec($sql)) {
             $error = $this->db->errorInfo();
 
@@ -115,6 +129,13 @@ class Connection {
         return $this->db->lastInsertId();
 
     }//end lastInsertId()
+
+    protected function log(string $sql, array $params = []): void
+    {
+        $p = json_encode($params);
+
+        $this->logger->info("{$sql} :: {$p}");
+    }//end log()
 
 
 }//end class
