@@ -10,10 +10,10 @@ class ColumnInfo
 
     /**
      * @param    string        $name
-     * @param    string        $type
+     * @param    string        $_type
      * @param    bool          $nullable
      */
-    public function __construct(public string $name = '', public string $type = '', public bool $nullable = true)
+    public function __construct(public string $name = '', public string $_type = '', public bool $nullable = true)
     {
     } //end __construct()
 

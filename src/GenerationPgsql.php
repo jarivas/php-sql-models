@@ -31,10 +31,10 @@ class GenerationPgsql extends Generation
     /**
      * @return bool|array<ColumnInfo>
      */
-    protected function getColumnsInfo(string $tableName): bool|array
+    protected function getColumnsInfo(string $_tableName): bool|array
     {
         $columns = [];
-        $stmt    = $this->connection->query("SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = '$tableName';");
+        $stmt    = $this->connection->query("SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = '$_tableName';");
 
         if (!$stmt) {
             return false;
@@ -48,9 +48,9 @@ class GenerationPgsql extends Generation
 
         foreach ($result as $info) {
             $name = $info['column_name'];
-            $type = $this->convertType($info['data_type']);
+            $_type = $this->convertType($info['data_type']);
 
-            $columns[] = new ColumnInfo($name, $type, $info['is_nullable'] != 'NO');
+            $columns[] = new ColumnInfo($name, $_type, $info['is_nullable'] != 'NO');
         }
 
         return $columns;
@@ -58,35 +58,35 @@ class GenerationPgsql extends Generation
     }//end getColumnsInfo()
 
 
-    protected function convertType(string $type): string
+    protected function convertType(string $_type): string
     {
-        if (str_contains($type, 'int')
-        || str_contains($type, 'serial')
+        if (str_contains($_type, 'int')
+        || str_contains($_type, 'serial')
         ) {
             return PhpTypes::Integer->value;
         }
 
-        if (str_contains($type, 'char')
-        || str_contains($type, 'text')
-        || str_contains($type, 'date')
-        || str_contains($type, 'time')
-        || str_contains($type, 'interval')
-        || str_contains($type, 'enum')
+        if (str_contains($_type, 'char')
+        || str_contains($_type, 'text')
+        || str_contains($_type, 'date')
+        || str_contains($_type, 'time')
+        || str_contains($_type, 'interval')
+        || str_contains($_type, 'enum')
         ) {
             return PhpTypes::String->value;
         }
 
-        if (str_contains($type, 'bool')
-        || str_contains($type, 'bit')) {
+        if (str_contains($_type, 'bool')
+        || str_contains($_type, 'bit')) {
             return PhpTypes::Bool->value;
         }
 
-        if (str_contains($type, 'real')
-        || str_contains($type, 'double')
-        || str_contains($type, 'float')
-        || str_contains($type, 'numeric')
-        || str_contains($type, 'decimal')
-        || str_contains($type, 'money')
+        if (str_contains($_type, 'real')
+        || str_contains($_type, 'double')
+        || str_contains($_type, 'float')
+        || str_contains($_type, 'numeric')
+        || str_contains($_type, 'decimal')
+        || str_contains($_type, 'money')
         ) {
             return PhpTypes::Float->value;
         }

@@ -40,10 +40,10 @@ class GenerationSqlite extends Generation
     /**
      * @return bool|array<ColumnInfo>
      */
-    protected function getColumnsInfo(string $tableName): bool|array
+    protected function getColumnsInfo(string $_tableName): bool|array
     {
         $columns = [];
-        $stmt    = $this->connection->query("PRAGMA table_info($tableName);");
+        $stmt    = $this->connection->query("PRAGMA table_info($_tableName);");
 
         if (!$stmt) {
             return false;
@@ -57,9 +57,9 @@ class GenerationSqlite extends Generation
 
         foreach ($result as $info) {
             $name = $info['name'];
-            $type = $this->convertType($info['type']);
+            $_type = $this->convertType($info['type']);
 
-            $columns[] = new ColumnInfo($name, $type, $info['notnull'] != '1');
+            $columns[] = new ColumnInfo($name, $_type, $info['notnull'] != '1');
         }
 
         return $columns;
@@ -67,27 +67,27 @@ class GenerationSqlite extends Generation
     }//end getColumnsInfo()
 
 
-    protected function convertType(string $type): string
+    protected function convertType(string $_type): string
     {
-        if (str_contains($type, 'INT')) {
+        if (str_contains($_type, 'INT')) {
             return PhpTypes::Integer->value;
         }
 
-        if (str_contains($type, 'BOOLEAN')) {
+        if (str_contains($_type, 'BOOLEAN')) {
             return PhpTypes::Bool->value;
         }
 
-        if (str_contains($type, 'CHAR')
-        || str_contains($type, 'TEXT')
-        || str_contains($type, 'DATE')) {
+        if (str_contains($_type, 'CHAR')
+        || str_contains($_type, 'TEXT')
+        || str_contains($_type, 'DATE')) {
             return PhpTypes::String->value;
         }
 
-        if (str_contains($type, 'REAL')
-        || str_contains($type, 'DOUBLE')
-        || str_contains($type, 'FLOAT')
-        || str_contains($type, 'NUMERIC')
-        || str_contains($type, 'DECIMAL')
+        if (str_contains($_type, 'REAL')
+        || str_contains($_type, 'DOUBLE')
+        || str_contains($_type, 'FLOAT')
+        || str_contains($_type, 'NUMERIC')
+        || str_contains($_type, 'DECIMAL')
         ) {
             return PhpTypes::Float->value;
         }

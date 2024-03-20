@@ -31,9 +31,9 @@ abstract class Generation
     protected string $dsn;
 
     /**
-     * @var Dbms $type
+     * @var Dbms $_type
      */
-    protected Dbms $type;
+    protected Dbms $_type;
 
     /**
      * @var string $dbName
@@ -50,11 +50,11 @@ abstract class Generation
     /**
      * @return bool|array<ColumnInfo>
      */
-    abstract protected function getColumnsInfo(string $tableName): bool|array;
+    abstract protected function getColumnsInfo(string $_tableName): bool|array;
 
 
     public function process(
-        Dbms $type,
+        Dbms $_type,
         string $host,
         string $dbName,
         string $targetFolder,
@@ -63,7 +63,7 @@ abstract class Generation
         null|string $password=null
     ): bool|string
     {
-        $this->type   = $type;
+        $this->_type   = $_type;
         $this->dbName = $dbName;
 
         $result = $this->createFolder($targetFolder);
@@ -99,10 +99,10 @@ abstract class Generation
     {
         $dsn = '';
 
-        if ($this->type == Dbms::Sqlite) {
+        if ($this->_type == Dbms::Sqlite) {
             $dsn = "sqlite:$host/{$this->dbName}";
         } else {
-            $dsn = "{$this->type->value}:host=$host;dbname={$this->dbName}";
+            $dsn = "{$this->_type->value}:host=$host;dbname={$this->dbName}";
         }
 
         return $dsn;
@@ -219,11 +219,11 @@ abstract class Generation
             return false;
         }
 
-        foreach ($tableNames as $tableName) {
-            $columns = $this->getColumnsInfo($tableName);
+        foreach ($tableNames as $_tableName) {
+            $columns = $this->getColumnsInfo($_tableName);
 
             if ($columns) {
-                $result[] = new TableInfo($tableName, $columns);
+                $result[] = new TableInfo($_tableName, $columns);
             }
         }
 
@@ -256,9 +256,9 @@ abstract class Generation
     protected function generateModels(array $tablesInfo, string $modelContent): void
     {
         foreach ($tablesInfo as $table) {
-            $tableName = $table->name;
+            $_tableName = $table->name;
 
-            $fileName = preg_replace("/[^\w_]/", '', $tableName);
+            $fileName = preg_replace("/[^\w_]/", '', $_tableName);
 
             if (is_string($fileName)) {
                 $fileName = str_replace('_', '', ucwords($fileName, '_'));
@@ -278,10 +278,10 @@ abstract class Generation
                     ],
                     [
                         $fileName,
-                        $tableName,
+                        $_tableName,
                         $columns,
                         $properties,
-                        ucfirst($this->type->value),
+                        ucfirst($this->_type->value),
                     ],
                     $modelContent
                 );
@@ -306,7 +306,7 @@ abstract class Generation
         foreach ($columnsInfo as $info) {
             $nullable = $info->nullable ? '?' : '';
             $columns .= "\n        '{$info->name}',";
-            $text     = $nullable.$info->type.' $'.$info->name;
+            $text     = $nullable.$info->_type.' $'.$info->name;
 
             $properties .= "    /**\n";
             $properties .= "     * @var $text\n";

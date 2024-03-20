@@ -10,14 +10,14 @@ class Model implements JsonSerializable
 {
     
     /**
-     * @var string $tableName
+     * @var string $_tableName
      */
-    public static string $tableName = '';
+    public static string $_tableName = '';
 
     /**
-     * @var Dbms $type
+     * @var Dbms $_type
      */
-    protected static Dbms $type;
+    protected static Dbms $_type;
 
     /**
      * @var array<string> $columns
@@ -166,16 +166,16 @@ class Model implements JsonSerializable
     }//end select()
 
     /**
-     * @param Join $type
-     * @param string $tableName
+     * @param Join $_type
+     * @param string $_tableName
      * @param string $onCol1
      * @param string $onCol2
      */
-    public function join(Join $type, string $tableName, string $onCol1, string $onCol2): void
+    public function join(Join $_type, string $_tableName, string $onCol1, string $onCol2): void
     {
         $this->joins[] = [
-            'type'      => $type->value,
-            'tableName' => $tableName,
+            'type'      => $_type->value,
+            'tableName' => $_tableName,
             'onCol1'    => $onCol1,
             'onCol2'    => $onCol2,
         ];
@@ -275,7 +275,7 @@ class Model implements JsonSerializable
 
         $this->where($pk, '=');
 
-        $sql = SqlGenerator::generateDelete(static::$type, static::$tableName, $params, $this->criteriaHelper($this->where));
+        $sql = SqlGenerator::generateDelete(static::$_type, static::$_tableName, $params, $this->criteriaHelper($this->where));
 
         unset($this->$pk);
 
@@ -305,8 +305,8 @@ class Model implements JsonSerializable
         }
 
         $sql = SqlGenerator::generateSelect(
-            static::$type,
-            static::$tableName,
+            static::$_type,
+            static::$_tableName,
             $params,
             $cols,
             $this->joins,
@@ -429,7 +429,7 @@ class Model implements JsonSerializable
         $params     = $this->columnsToParams($pk);
         $connection = Connection::getInstance();
 
-        $sql = SqlGenerator::generateInsert(static::$type, static::$tableName, $params);
+        $sql = SqlGenerator::generateInsert(static::$_type, static::$_tableName, $params);
 
         $connection->executeSql($sql, $params);
 
@@ -456,7 +456,7 @@ class Model implements JsonSerializable
 
         $this->where($pk, '=');
 
-        $sql = SqlGenerator::generateUpdate(static::$type, static::$tableName, $params, $this->criteriaHelper($this->where));
+        $sql = SqlGenerator::generateUpdate(static::$_type, static::$_tableName, $params, $this->criteriaHelper($this->where));
 
         $this->resetFilters();
 

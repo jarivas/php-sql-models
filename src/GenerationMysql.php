@@ -8,8 +8,6 @@ use \PDO;
 
 class GenerationMysql extends Generation
 {
-
-
     /**
      * @return bool|array<string>
      */
@@ -29,10 +27,10 @@ class GenerationMysql extends Generation
     /**
      * @return bool|array<ColumnInfo>
      */
-    protected function getColumnsInfo(string $tableName): bool|array
+    protected function getColumnsInfo(string $_tableName): bool|array
     {
         $columns = [];
-        $stmt    = $this->connection->query("DESC `$tableName`");
+        $stmt    = $this->connection->query("DESC `$_tableName`");
 
         if (!$stmt) {
             return false;
@@ -46,9 +44,9 @@ class GenerationMysql extends Generation
 
         foreach ($result as $info) {
             $name = $info['Field'];
-            $type = $this->convertType($info['Type']);
+            $_type = $this->convertType($info['Type']);
 
-            $columns[] = new ColumnInfo($name, $type, $info['Null'] != 'NO');
+            $columns[] = new ColumnInfo($name, $_type, $info['Null'] != 'NO');
         }
 
         return $columns;
@@ -56,32 +54,32 @@ class GenerationMysql extends Generation
     }//end getColumnsInfo()
 
 
-    protected function convertType(string $type): string
+    protected function convertType(string $_type): string
     {
-        if (str_contains($type, 'int')) {
+        if (str_contains($_type, 'int')) {
             return PhpTypes::Integer->value;
         }
 
-        if (str_contains($type, 'char')
-        || str_contains($type, 'text')
-        || str_contains($type, 'date')
-        || str_contains($type, 'time')
-        || str_contains($type, 'year')
-        || str_contains($type, 'enum')
-        || str_contains($type, 'set')) {
+        if (str_contains($_type, 'char')
+        || str_contains($_type, 'text')
+        || str_contains($_type, 'date')
+        || str_contains($_type, 'time')
+        || str_contains($_type, 'year')
+        || str_contains($_type, 'enum')
+        || str_contains($_type, 'set')) {
             return PhpTypes::String->value;
         }
 
-        if (str_contains($type, 'bool')
-        || str_contains($type, 'bit')) {
+        if (str_contains($_type, 'bool')
+        || str_contains($_type, 'bit')) {
             return PhpTypes::Bool->value;
         }
 
-        if (str_contains($type, 'real')
-        || str_contains($type, 'double')
-        || str_contains($type, 'float')
-        || str_contains($type, 'numeric')
-        || str_contains($type, 'decimal')
+        if (str_contains($_type, 'real')
+        || str_contains($_type, 'double')
+        || str_contains($_type, 'float')
+        || str_contains($_type, 'numeric')
+        || str_contains($_type, 'decimal')
         ) {
             return PhpTypes::Float->value;
         }
