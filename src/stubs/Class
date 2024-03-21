@@ -5,7 +5,7 @@ namespace {{namespace}};
 
 /**
  * @method static bool|{{class_name}} first(array<string, mixed> $columnValues)
- * @method static bool|{{class_name}}[] get(array<string, mixed> $columnValues, int $offset, int $limit, array $columns): bool|array
+ * @method static bool|{{class_name}}[] get(array<string, mixed> $columnValues = [], int $offset = 0, int $limit = 100, array $columns = []): bool|array
  */
 class {{class_name}} extends Model
 {

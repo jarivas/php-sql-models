@@ -68,7 +68,7 @@ class Model implements JsonSerializable
      * @param array<string, mixed> $columnValues
      * @return bool|static
      */
-    public static function first(array $columnValues = []): mixed
+    public static function first(array $columnValues = []): bool|static
     {
         // @phpstan-ignore-next-line
         $new = new static();
@@ -92,7 +92,7 @@ class Model implements JsonSerializable
      * @param array<string> $columns
      * @return bool|array<static>
      */
-    public static function get(array $columnValues = [], int $offset = 0, int $limit = 100, array $columns = []): mixed
+    public static function get(array $columnValues = [], int $offset = 0, int $limit = 100, array $columns = []): bool|array
     {
         // @phpstan-ignore-next-line
         $new = new static();
