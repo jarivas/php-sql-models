@@ -90,7 +90,7 @@ class Model implements JsonSerializable
      * @param int $offset
      * @param int $limit
      * @param array<string> $columns
-     * @return bool|array bool|array<static>
+     * @return bool|array<static>
      */
     public static function get(array $columnValues = [], int $offset = 0, int $limit = 100, array $columns = []): mixed
     {
