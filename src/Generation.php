@@ -16,29 +16,9 @@ abstract class Generation
     protected PDO $connection;
 
     /**
-     * @var string $targetFolder holds the directory where the models will be generated
-     */
-    protected string $targetFolder;
-
-    /**
      * @var string $stubsFolder holds the directory where the studs models are
      */
     protected string $stubsFolder;
-
-    /**
-     * @var string $dsn the connection string for PDO
-     */
-    protected string $dsn;
-
-    /**
-     * @var Dbms $_type
-     */
-    protected Dbms $_type;
-
-    /**
-     * @var string $dbName
-     */
-    protected string $dbName;
 
 
     /**
@@ -53,79 +33,59 @@ abstract class Generation
     abstract protected function getColumnsInfo(string $_tableName): bool|array;
 
 
-    public function process(
-        Dbms $_type,
-        string $host,
-        string $dbName,
-        string $targetFolder,
-        string $namespace,
-        null|string $username=null,
-        null|string $password=null
-    ): bool|string
-    {
-        $this->_type   = $_type;
-        $this->dbName = $dbName;
+    public function __construct(
+        private DbConnectionInfo $dbInfo,
+        private string $targetFolder,
+        private string $namespace
+        ) {
 
-        $result = $this->createFolder($targetFolder);
+    }//end __construct()
+
+
+    public function process(): bool|string
+    {
+        $result = $this->createFolder($this->targetFolder);
 
         if (is_string($result)) {
             return $result;
         }
 
-        $this->targetFolder = $targetFolder.'/';
+        $this->targetFolder .= '/';
 
         $this->stubsFolder = $this->getStubsFolder();
-
-        $this->dsn = $this->generateDsn($host);
 
         if (! $this->stubsFolder) {
             return 'Problem on getStubsFolder';
         }
 
-        $this->connect($username, $password);
+        $this->connect();
 
-        $result = $this->generateFiles($namespace, $username, $password);
+        $result = $this->generateFiles($this->dbInfo->username, $this->dbInfo->password);
 
         if ($result) {
             return $result;
         }
 
-        return $this->generateClasses($namespace);
+        return $this->generateClasses();
 
     }//end process()
-
-
-    protected function generateDsn(string $host): string
-    {
-        $dsn = '';
-
-        if ($this->_type == Dbms::Sqlite) {
-            $dsn = "sqlite:$host/{$this->dbName}";
-        } else {
-            $dsn = "{$this->_type->value}:host=$host;dbname={$this->dbName}";
-        }
-
-        return $dsn;
-
-    }//end generateDsn()
 
 
     /**
      * @throws \PDOException
      */
-    protected function connect(null|string $username=null, null|string $password=null): void
+    protected function connect(): void
     {
         if (isset($this->connection)) {
             return;
         }
 
-        $this->connection = new PDO($this->dsn, $username, $password);
+        $this->connection = new PDO($this->dbInfo->generateDsn(), $this->dbInfo->username, $this->dbInfo->password);
 
     }//end connect()
 
 
     protected function generateFiles(
-        string $namespace,
         null|string $username=null,
         null|string $password=null
     ): bool|string
@@ -142,8 +102,8 @@ abstract class Generation
                 "'{{password}}'",
             ],
             [
-                $namespace,
-                $this->dsn,
+                $this->namespace,
+                $this->dbInfo->generateDsn(),
                 $username,
                 $password,
             ]
@@ -153,15 +113,15 @@ abstract class Generation
             return 'Problem generating the connection file';
         }
 
-        if (! $this->generateFile('Model', ['{{namespace}}'], [$namespace])) {
+        if (! $this->generateFile('Model', ['{{namespace}}'], [$this->namespace])) {
             return 'Problem generating the ModelBody file';
         }
 
-        if (! $this->generateFile('SqlGenerator', ['{{namespace}}'], [$namespace])) {
+        if (! $this->generateFile('SqlGenerator', ['{{namespace}}'], [$this->namespace])) {
             return 'Problem generating the SqlGenerator file';
         }
 
-        if (! $this->generateEnum($namespace)) {
+        if (! $this->generateEnum($this->namespace)) {
             return 'Problem generating the enum files';
         }
 
@@ -185,17 +145,17 @@ abstract class Generation
     }//end generateFile()
 
 
-    protected function generateClasses(string $namespace): bool|string
+    protected function generateClasses(): bool|string
     {
-        $content = $this->getClassmodelContent($namespace);
+        $content = $this->getClassmodelContent($this->namespace);
 
-        if (! $content) {
+        if (is_bool($content)) {
             return 'Problem on generateClasses reading entity file';
         }
 
         $tablesInfo = $this->getTablesInfo();
 
-        if (! $tablesInfo) {
+        if (is_bool($tablesInfo)) {
             return 'Problem getting tables';
         }
 
@@ -215,14 +175,14 @@ abstract class Generation
         $columns    = [];
         $result     = [];
 
-        if (is_null($tableNames)) {
+        if (is_bool($tableNames)) {
             return false;
         }
 
         foreach ($tableNames as $_tableName) {
             $columns = $this->getColumnsInfo($_tableName);
 
-            if ($columns) {
+            if (is_array($columns)) {
                 $result[] = new TableInfo($_tableName, $columns);
             }
         }
@@ -281,7 +241,7 @@ abstract class Generation
                         $_tableName,
                         $columns,
                         $properties,
-                        ucfirst($this->_type->value),
+                        ucfirst($this->dbInfo->type->value),
                     ],
                     $modelContent
                 );
@@ -330,21 +290,25 @@ abstract class Generation
      */
     protected function generateEnum(string $namespace): bool
     {
-        $files = ['Dbms.php', 'Join.php', 'Logger.php'];
-        $fileName = '';
-        $i = 0;
-        $max = count($files);
-        $next = false;
+        $files     = [
+            'Dbms.php',
+            'Join.php',
+            'Logger.php',
+        ];
+        $fileName  = '';
+        $i         = 0;
+        $max       = count($files);
+        $next      = false;
         $namespace = "namespace $namespace;";
-        
+
         do {
-            $fileName = $files[$i];
+            $fileName    = $files[$i];
             $newFileName = $this->targetFolder.$fileName;
-            $fileName = dirname($this->stubsFolder, 1).'/'.$fileName;
-                
+            $fileName    = dirname($this->stubsFolder, 1).'/'.$fileName;
+
             $next = $this->copyReplace($fileName, $newFileName, ['namespace SqlModels;'], [$namespace]);
             ++$i;
-        }while($i < $max && $next);
+        } while ($i < $max && $next);
 
         return $next;
 

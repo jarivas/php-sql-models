@@ -8,6 +8,8 @@ use \PDO;
 
 class GenerationMysql extends Generation
 {
+
+
     /**
      * @return bool|array<string>
      */
@@ -27,10 +29,10 @@ class GenerationMysql extends Generation
     /**
      * @return bool|array<ColumnInfo>
      */
-    protected function getColumnsInfo(string $_tableName): bool|array
+    protected function getColumnsInfo(string $tableName): bool|array
     {
         $columns = [];
-        $stmt    = $this->connection->query("DESC `$_tableName`");
+        $stmt    = $this->connection->query("DESC `$tableName`");
 
         if (!$stmt) {
             return false;
@@ -43,7 +45,7 @@ class GenerationMysql extends Generation
         }
 
         foreach ($result as $info) {
-            $name = $info['Field'];
+            $name  = $info['Field'];
             $_type = $this->convertType($info['Type']);
 
             $columns[] = new ColumnInfo($name, $_type, $info['Null'] != 'NO');

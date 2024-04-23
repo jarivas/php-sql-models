@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SqlModels\Tests\Unit\Sqlite;
 
 use PHPUnit\Framework\TestCase;
+use SqlModels\DbConnectionInfo;
 use SqlModels\GenerationSqlite;
 use SqlModels\Dbms;
 
@@ -20,9 +21,10 @@ class GenerationTest extends TestCase
         $host         = "$appDir/db/Sqlite";
         $dbName       = 'chinook.db';
         $targetFolder = "$testDir/Sqlite/Models";
-        $generation   = new GenerationSqlite();
+        $dbInfo       = new DbConnectionInfo(Dbms::Sqlite, $host, $dbName);
+        $generation   = new GenerationSqlite($dbInfo, $targetFolder, self::NAMESPACE);
 
-        $result = $generation->process(Dbms::Sqlite, $host, $dbName, $targetFolder, self::NAMESPACE);
+        $result = $generation->process();
 
         $this->assertTrue($result);
 
@@ -36,7 +38,7 @@ class GenerationTest extends TestCase
 
         $this->assertStringContainsString(self::NAMESPACE, $content);
 
-    }//end testGenerateSqliteOk()
+    }//end testGenerateOk()
 
 
 }//end class

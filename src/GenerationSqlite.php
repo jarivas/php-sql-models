@@ -40,10 +40,10 @@ class GenerationSqlite extends Generation
     /**
      * @return bool|array<ColumnInfo>
      */
-    protected function getColumnsInfo(string $_tableName): bool|array
+    protected function getColumnsInfo(string $tableName): bool|array
     {
         $columns = [];
-        $stmt    = $this->connection->query("PRAGMA table_info($_tableName);");
+        $stmt    = $this->connection->query("PRAGMA table_info($tableName);");
 
         if (!$stmt) {
             return false;

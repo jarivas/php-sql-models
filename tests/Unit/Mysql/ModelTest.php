@@ -105,7 +105,7 @@ class ModelTest extends TestCase
 
     public function testUpdate(): void
     {
-        Connection::getInstance()->executeSql('DELETE FROM album WHERE Title = :Title', ['Title' => __FUNCTION__]);
+        Connection::getInstance()->executeSql('DELETE FROM Album WHERE Title = :Title', ['Title' => __FUNCTION__]);
 
         $album = $this->testCreate();
 
@@ -125,7 +125,7 @@ class ModelTest extends TestCase
 
     public function testDelete(): void
     {
-        Connection::getInstance()->executeSql('DELETE FROM album WHERE Title = :Title', ['Title' => __FUNCTION__]);
+        Connection::getInstance()->executeSql('DELETE FROM Album WHERE Title = :Title', ['Title' => __FUNCTION__]);
 
         $album = $this->testCreate();
 

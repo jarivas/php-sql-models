@@ -31,10 +31,10 @@ class GenerationPgsql extends Generation
     /**
      * @return bool|array<ColumnInfo>
      */
-    protected function getColumnsInfo(string $_tableName): bool|array
+    protected function getColumnsInfo(string $tableName): bool|array
     {
         $columns = [];
-        $stmt    = $this->connection->query("SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = '$_tableName';");
+        $stmt    = $this->connection->query("SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = '$tableName';");
 
         if (!$stmt) {
             return false;

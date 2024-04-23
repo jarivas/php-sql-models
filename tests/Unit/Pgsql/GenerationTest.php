@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SqlModels\Tests\Unit\Pgsql;
 
 use PHPUnit\Framework\TestCase;
+use SqlModels\DbConnectionInfo;
 use SqlModels\GenerationPgsql;
 use SqlModels\Dbms;
 
@@ -17,17 +18,10 @@ class GenerationTest extends TestCase
     {
         $dir          = dirname(__DIR__, 2);
         $targetFolder = "$dir/Pgsql/Models";
-        $generation   = new GenerationPgsql();
+        $dbInfo       = new DbConnectionInfo(Dbms::Pgsql, $_ENV['PGSQL_HOST'], $_ENV['MYSQL_DATABASE'], $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASSWORD']);
+        $generation   = new GenerationPgsql($dbInfo, $targetFolder, self::NAMESPACE);
 
-        $result = $generation->process(
-            Dbms::Pgsql,
-            $_ENV['PGSQL_HOST'],
-            $_ENV['MYSQL_DATABASE'],
-            $targetFolder,
-            self::NAMESPACE,
-            $_ENV['MYSQL_USER'],
-            $_ENV['MYSQL_PASSWORD'],
-        );
+        $result = $generation->process();
 
         $this->assertTrue($result);
 

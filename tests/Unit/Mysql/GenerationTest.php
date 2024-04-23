@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SqlModels\Tests\Unit\Mysql;
 
 use PHPUnit\Framework\TestCase;
+use SqlModels\DbConnectionInfo;
 use SqlModels\GenerationMysql;
 use SqlModels\Dbms;
 
@@ -17,17 +18,10 @@ class GenerationTest extends TestCase
     {
         $dir          = dirname(__DIR__, 2);
         $targetFolder = "$dir/Mysql/Models";
-        $generation   = new GenerationMysql();
+        $dbInfo       = new DbConnectionInfo(Dbms::Mysql, $_ENV['MYSQL_HOST'], $_ENV['MYSQL_DATABASE'], $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASSWORD']);
+        $generation   = new GenerationMysql($dbInfo, $targetFolder, self::NAMESPACE);
 
-        $result = $generation->process(
-            Dbms::Mysql,
-            $_ENV['MYSQL_HOST'],
-            $_ENV['MYSQL_DATABASE'],
-            $targetFolder,
-            self::NAMESPACE,
-            $_ENV['MYSQL_USER'],
-            $_ENV['MYSQL_PASSWORD'],
-        );
+        $result = $generation->process();
 
         $this->assertTrue($result);
 
