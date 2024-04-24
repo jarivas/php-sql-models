@@ -12,12 +12,12 @@ class Model implements JsonSerializable
     /**
      * @var string $_tableName
      */
-    public static string $_tableName = '';
+    public static string $_tableName = '';// phpcs:ignore
 
     /**
      * @var Dbms $_type
      */
-    protected static Dbms $_type;
+    protected static Dbms $_type;// phpcs:ignore
 
     /**
      * @var array<string> $columns

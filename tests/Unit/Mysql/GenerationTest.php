@@ -18,7 +18,18 @@ class GenerationTest extends TestCase
     {
         $dir          = dirname(__DIR__, 2);
         $targetFolder = "$dir/Mysql/Models";
-        $dbInfo       = new DbConnectionInfo(Dbms::Mysql, $_ENV['MYSQL_HOST'], $_ENV['MYSQL_DATABASE'], $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASSWORD']);
+        $dbInfo       = new DbConnectionInfo(
+            Dbms::Mysql,
+            '127.0.0.1',
+            $_ENV['MYSQL_DATABASE'],
+            $_ENV['MYSQL_USER'],
+            $_ENV['MYSQL_PASSWORD'],
+            3306,
+            $_ENV['MYSQL_HOST'],
+            $_ENV['MYSQL_USER'],
+            $_ENV['MYSQL_PASSWORD'],
+            2222,
+        );
         $generation   = new GenerationMysql($dbInfo, $targetFolder, self::NAMESPACE);
 
         $result = $generation->process();

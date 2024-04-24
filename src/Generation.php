@@ -60,7 +60,7 @@ abstract class Generation
 
         $this->connect();
 
-        $result = $this->generateFiles($this->dbInfo->username, $this->dbInfo->password);
+        $result = $this->generateFiles();
 
         if ($result) {
             return $result;
@@ -80,30 +80,34 @@ abstract class Generation
             return;
         }
 
-        $this->connection = new PDO($this->dbInfo->generateDsn(), $this->dbInfo->username, $this->dbInfo->password);
+        if (is_string($this->dbInfo->sshTunnel)) {
+            shell_exec($this->dbInfo->sshTunnel);
+        }
+
+        $this->connection = new PDO($this->dbInfo->dsn, $this->dbInfo->dbUsername, $this->dbInfo->dbPassword);
 
     }//end connect()
 
 
-    protected function generateFiles(
-        null|string $username=null,
-        null|string $password=null
-    ): bool|string
+    protected function generateFiles(): bool|string
     {
-        $username = is_null($username) ? 'null' : "'$username'";
-        $password = is_null($password) ? 'null' : "'$password'";
+        $username  = is_null($this->dbInfo->dbUsername) ? 'null' : "'{$this->dbInfo->dbUsername}'";
+        $password  = is_null($this->dbInfo->dbPassword) ? 'null' : "'{$this->dbInfo->dbPassword}'";
+        $sshTunnel = is_null($this->dbInfo->sshTunnel) ? 'null' : "'{$this->dbInfo->sshTunnel}'";
 
         $result = $this->generateFile(
             'Connection',
             [
                 '{{namespace}}',
                 '{{dsn}}',
-                "'{{username}}'",
-                "'{{password}}'",
+                '{{sshTunnel}}',
+                '{{username}}',
+                '{{password}}',
             ],
             [
                 $this->namespace,
-                $this->dbInfo->generateDsn(),
+                $this->dbInfo->dsn,
+                $sshTunnel,
                 $username,
                 $password,
             ]

@@ -1,10 +1,16 @@
 services:
     dev:
-        build: .
+        build:
+            context: .
+            dockerfile: php.Dockerfile
         volumes:
             - .:/app
     mysql:
-        image: mariadb
+        build:
+            context: .
+            dockerfile: mysql.Dockerfile
+        ports:
+            - 2222:22
         environment:
             - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
             - MYSQL_ROOT_HOST=$MYSQL_ROOT_HOST
@@ -13,6 +19,7 @@ services:
             - MYSQL_PASSWORD=$MYSQL_PASSWORD
         volumes:
             - ./db/Mysql:/docker-entrypoint-initdb.d
+            - ./db/mysql-entrypoint.sh:/home/Chinook/mysql-entrypoint.sh
     postgres:
         image: postgres
         ports:

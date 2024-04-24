@@ -20,6 +20,11 @@ class Connection {
     private string $dsn = '{{dsn}}';
 
     /**
+     * @var null|string $sshTunnel
+     */
+    private null|string $sshTunnel = {{sshTunnel}};
+
+    /**
      * @var PDO $db
      */
     private PDO $db;
@@ -27,12 +32,12 @@ class Connection {
     /**
      * @var null|string $username
      */
-    private null|string $username = '{{username}}';
+    private null|string $username = {{username}};
 
     /**
      * @var null|string $password
      */
-    private null|string $password = '{{password}}';
+    private null|string $password = {{password}};
 
     /**
      * @var LoggerInterface $logger
@@ -51,8 +56,12 @@ class Connection {
     }//end getInstance()
 
 
-    private function __construct(LoggerInterface|null $logger = null)
+    private function __construct(LoggerInterface|null $logger=null)
     {
+        if (is_string($this->sshTunnel)) {
+            shell_exec($this->sshTunnel);
+        }
+
         $this->db = new PDO($this->dsn, $this->username, $this->password);
 
         $this->logger = (is_null($logger)) ? new Logger() : $logger;
