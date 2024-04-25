@@ -44,9 +44,11 @@ class DbConnectionInfo
             return;
         }
 
-        ++$this->dbPort;
+        $remotePort = $this->dbPort;
 
-        $this->sshTunnel = "sshpass -p {$this->sshPassword} ssh -fN -L {$this->dbPort}:{$this->sshHost}:{$this->sshPort} {$this->sshUsername}@{$this->sshHost}";
+        ++$this->dbPort;
+        
+        $this->sshTunnel = "sshpass -p {$this->sshPassword} ssh -fNg -L {$this->dbPort}:{$this->sshHost}:{$remotePort} {$this->sshUsername}@{$this->sshHost} -p {$this->sshPort}";
 
     }//end setSshTunnel()
 

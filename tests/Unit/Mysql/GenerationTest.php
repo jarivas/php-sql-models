@@ -27,9 +27,9 @@ class GenerationTest extends TestCase
             3306,
             $_ENV['MYSQL_HOST'],
             $_ENV['MYSQL_USER'],
-            $_ENV['MYSQL_PASSWORD'],
-            2222,
+            $_ENV['MYSQL_PASSWORD']
         );
+        
         $generation   = new GenerationMysql($dbInfo, $targetFolder, self::NAMESPACE);
 
         $result = $generation->process();
