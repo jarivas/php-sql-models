@@ -18,6 +18,10 @@ class GenerationTest extends TestCase
     {
         $dir          = dirname(__DIR__, 2);
         $targetFolder = "$dir/Mysql/Models";
+        
+            /*
+            `sh /home/Chinook/mysql-entrypoint.sh` run it in the mysql server
+            Uncomment it for ssh tunnel
         $dbInfo       = new DbConnectionInfo(
             Dbms::Mysql,
             '127.0.0.1',
@@ -28,7 +32,10 @@ class GenerationTest extends TestCase
             $_ENV['MYSQL_HOST'],
             $_ENV['MYSQL_USER'],
             $_ENV['MYSQL_PASSWORD']
+            
         );
+        */
+        $dbInfo       = new DbConnectionInfo(Dbms::Mysql, $_ENV['MYSQL_HOST'], $_ENV['MYSQL_DATABASE'], $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASSWORD']);
         
         $generation   = new GenerationMysql($dbInfo, $targetFolder, self::NAMESPACE);
 

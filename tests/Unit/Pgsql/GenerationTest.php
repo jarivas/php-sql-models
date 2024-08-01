@@ -18,7 +18,7 @@ class GenerationTest extends TestCase
     {
         $dir          = dirname(__DIR__, 2);
         $targetFolder = "$dir/Pgsql/Models";
-        $dbInfo       = new DbConnectionInfo(Dbms::Pgsql, $_ENV['PGSQL_HOST'], $_ENV['MYSQL_DATABASE'], $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASSWORD']);
+        $dbInfo       = new DbConnectionInfo(Dbms::Pgsql, $_ENV['PGSQL_HOST'], $_ENV['MYSQL_DATABASE'], $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASSWORD'], 5432);
         $generation   = new GenerationPgsql($dbInfo, $targetFolder, self::NAMESPACE);
 
         $result = $generation->process();

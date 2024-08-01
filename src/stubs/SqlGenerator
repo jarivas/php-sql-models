@@ -9,8 +9,8 @@ class SqlGenerator
 
 
     /**
-     * @param Dbms $_type
-     * @param string $_tableName
+     * @param Dbms $dbms
+     * @param string $tName
      * @param array<string, string> $params
      * @param array<string> $selectedColumns
      * @param null|array<int, array<string, string>> $joins
@@ -23,8 +23,8 @@ class SqlGenerator
      * @return string
      */
     public static function generateSelect(
-        Dbms $_type,
-        string $_tableName,
+        Dbms $dbms,
+        string $tName,
         array &$params,
         array $selectedColumns,
         null|array $joins=null,
@@ -35,55 +35,55 @@ class SqlGenerator
         int $limit=1000,
         int $offset=0
     ): string {
-        $c = self::generateColumns($_type, $selectedColumns);
+        $c = self::generateColumns($dbms, $selectedColumns);
 
-        $j = self::generateJoins($_type, $joins);
+        $j = self::generateJoins($dbms, $joins);
 
-        $w = self::generateConditions($_type, 'WHERE', $where, $params);
+        $w = self::generateConditions($dbms, 'WHERE', $where, $params);
 
-        $g = self::generateGroupBy($_type, $groupBy);
+        $g = self::generateGroupBy($dbms, $groupBy);
 
-        $h = self::generateConditions($_type, 'HAVING', $having, $params);
+        $h = self::generateConditions($dbms, 'HAVING', $having, $params);
 
-        $o = self::generateOrderBy($_type, $orderBy);
+        $o = self::generateOrderBy($dbms, $orderBy);
 
         $l = self::generateLimit($limit);
 
         $of = self::generateOffsset($offset);
 
-        $_tableName = ($_type != Dbms::Pgsql) ? $_tableName : '"'.$_tableName.'"';
+        $tName = ($dbms != Dbms::Pgsql) ? $tName : '"'.$tName.'"';
 
-        return "SELECT $c FROM $_tableName $j$w$g$h$o$l$of";
+        return "SELECT $c FROM $tName $j$w$g$h$o$l$of";
 
     }//end generateSelect()
 
 
     /**
-     * @param Dbms $_type
-     * @param string $_tableName
+     * @param Dbms $dbms
+     * @param string $tName
      * @param array<string, string> $params
      * @return string
      */
     public static function generateInsert(
-        Dbms $_type,
-        string $_tableName,
+        Dbms $dbms,
+        string $tName,
         array $params
         ): string
     {
         $cols    = array_keys($params);
-        $columns = self::generateColumns($_type, $cols);
+        $columns = self::generateColumns($dbms, $cols);
         $values  = self::generateValues($cols);
 
-        $_tableName = ($_type != Dbms::Pgsql) ? $_tableName : '"'.$_tableName.'"';
+        $tName = ($dbms != Dbms::Pgsql) ? $tName : '"'.$tName.'"';
 
-        return "INSERT INTO $_tableName ($columns) VALUES (:$values);";
+        return "INSERT INTO $tName ($columns) VALUES (:$values);";
 
     }//end generateInsert()
 
 
     /**
-     * @param Dbms $_type
-     * @param string $_tableName
+     * @param Dbms $dbms
+     * @param string $tName
      * @param array<string, string> $params
      * @param array<int, array<string, string>> $where
      * @param null|array<int, array<string, string>> $orderBy
@@ -91,32 +91,32 @@ class SqlGenerator
      * @return string
      */
     public static function generateUpdate(
-        Dbms $_type,
-        string $_tableName,
+        Dbms $dbms,
+        string $tName,
         array &$params,
         array $where=[],
         null|array $orderBy=null,
         int $limit=0
         )
     {
-        $s = self::generateSet($_type, array_keys($params));
+        $s = self::generateSet($dbms, array_keys($params));
 
-        $w = self::generateConditions($_type, 'WHERE', $where, $params);
+        $w = self::generateConditions($dbms, 'WHERE', $where, $params);
 
-        $o = self::generateOrderBy($_type, $orderBy);
+        $o = self::generateOrderBy($dbms, $orderBy);
 
         $l = ($limit > 0) ? self::generateLimit($limit): '';
 
-        $_tableName = ($_type != Dbms::Pgsql) ? $_tableName : '"'.$_tableName.'"';
+        $tName = ($dbms != Dbms::Pgsql) ? $tName : '"'.$tName.'"';
 
-        return "UPDATE $_tableName SET $s$w$o$l";
+        return "UPDATE $tName SET $s$w$o$l";
 
     }//end generateUpdate()
 
 
     /**
-     * @param Dbms $_type
-     * @param string $_tableName
+     * @param Dbms $dbms
+     * @param string $tName
      * @param array<string, string> $params
      * @param array<int, array<string, string>> $where
      * @param null|array<int, array<string, string>> $orderBy
@@ -124,52 +124,52 @@ class SqlGenerator
      * @return string
      */
     public static function generateDelete(
-        Dbms $_type,
-        string $_tableName,
+        Dbms $dbms,
+        string $tName,
         array &$params,
         array $where=[],
         null|array $orderBy=null,
         int $limit=0
         ): string
     {
-        $w = self::generateConditions($_type, 'WHERE', $where, $params);
+        $w = self::generateConditions($dbms, 'WHERE', $where, $params);
 
-        $o = self::generateOrderBy($_type, $orderBy);
+        $o = self::generateOrderBy($dbms, $orderBy);
 
         $l = ($limit > 0) ? self::generateLimit($limit): '';
 
-        $_tableName = ($_type != Dbms::Pgsql) ? $_tableName : '"'.$_tableName.'"';
+        $tName = ($dbms != Dbms::Pgsql) ? $tName : '"'.$tName.'"';
 
-        return "DELETE FROM $_tableName $w";
+        return "DELETE FROM $tName $w";
 
     }//end generateDelete()
 
 
     /**
-     * @param Dbms $_type
+     * @param Dbms $dbms
      * @param array<int, string> $cols
      * @return string
      */
-    protected static function generateColumns(Dbms $_type, array $cols): string
+    protected static function generateColumns(Dbms $dbms, array $cols): string
     {
-        return ($_type != Dbms::Pgsql) ? implode(', ', $cols) : '"'.implode('", "', $cols).'"';
+        return ($dbms != Dbms::Pgsql) ? implode(', ', $cols) : '"'.implode('", "', $cols).'"';
 
     }//end generateColumns()
 
 
     /**
-     * @param Dbms $_type
+     * @param Dbms $dbms
      * @param null|array<int, array<string, string>> $joins
      * @return string
      */
-    protected static function generateJoins(Dbms $_type, null|array $joins): string
+    protected static function generateJoins(Dbms $dbms, null|array $joins): string
     {
         if (empty($joins)) {
             return '';
         }
 
         $sql = '';
-        $isPg = ($_type == Dbms::Pgsql);
+        $isPg = ($dbms == Dbms::Pgsql);
 
         foreach ($joins as $j) {
             $format = $isPg ? ' %s JOIN %s ON "%s" = "%s"' : ' %s JOIN %s ON %s = "%s"';
@@ -181,14 +181,14 @@ class SqlGenerator
     }//end generateJoins()
 
     /**
-     * @param Dbms $_type
+     * @param Dbms $dbms
      * @param string $conditionType
      * @param array<int, array<string, string>> $conditions
      * @param array<string, string> $params
      * @return string
      */
     protected static function generateConditions(
-        Dbms $_type,
+        Dbms $dbms,
         string $conditionType,
         array $conditions,
         array &$params): string
@@ -201,7 +201,7 @@ class SqlGenerator
 
         foreach ($conditions as $i => $c) {
             $operator = $c['operator'];
-            $col      = ($_type != Dbms::Pgsql) ? $c['column'] : '"'.$c['column'].'"';
+            $col      = ($dbms != Dbms::Pgsql) ? $c['column'] : '"'.$c['column'].'"';
 
             if ($operator != 'IN') {
                 $sql .= sprintf(' %s %s %s :%s%s', $c['condition_operator'], $col, $operator, $c['column'], $i);
@@ -216,17 +216,17 @@ class SqlGenerator
     }//end generateConditions()
 
     /**
-     * @param Dbms $_type
+     * @param Dbms $dbms
      * @param null|string $groupBy
      * @return string
      */
-    protected static function generateGroupBy(Dbms $_type, null|string $groupBy): string
+    protected static function generateGroupBy(Dbms $dbms, null|string $groupBy): string
     {
         if (empty($groupBy)) {
             return '';
         }
 
-        return ($_type != Dbms::Pgsql) ? " GROUP BY $groupBy" : " GROUP BY \"$groupBy\"";
+        return ($dbms != Dbms::Pgsql) ? " GROUP BY $groupBy" : " GROUP BY \"$groupBy\"";
 
     }//end generateGroupBy()
 
@@ -254,11 +254,11 @@ class SqlGenerator
 
 
     /**
-     * @param Dbms $_type
+     * @param Dbms $dbms
      * @param null|array<array<string, string>> $orderBy
      * @return string
      */
-    protected static function generateOrderBy(Dbms $_type, null|array $orderBy): string
+    protected static function generateOrderBy(Dbms $dbms, null|array $orderBy): string
     {
         if (empty($orderBy)) {
             return '';
@@ -270,7 +270,7 @@ class SqlGenerator
             $sql .= implode(' ', $order);
         }
 
-        return ' ORDER BY '.self::generateColumns($_type, $orderBy);
+        return ' ORDER BY '.self::generateColumns($dbms, $orderBy);
 
     }//end generateOrderBy()
 
@@ -287,14 +287,14 @@ class SqlGenerator
 
 
     /**
-     * @param Dbms $_type
+     * @param Dbms $dbms
      * @param array<int, string> $cols
      * @return string
      */
-    protected static function generateSet(Dbms $_type, array $cols): string
+    protected static function generateSet(Dbms $dbms, array $cols): string
     {
         $sql = '';
-        $isPg = ($_type == Dbms::Pgsql);
+        $isPg = ($dbms == Dbms::Pgsql);
         
         foreach ($cols as $c) {
             $sql .= $isPg ? " \"$c\" = :$c," : " $c = :$c,";

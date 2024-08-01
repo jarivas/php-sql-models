@@ -9,6 +9,9 @@ services:
         build:
             context: .
             dockerfile: mysql.Dockerfile
+            args:
+                - MYSQL_USER=$MYSQL_USER
+                - MYSQL_PASSWORD=$MYSQL_PASSWORD
         ports:
             - 2222:22
         environment:
@@ -19,7 +22,6 @@ services:
             - MYSQL_PASSWORD=$MYSQL_PASSWORD
         volumes:
             - ./db/Mysql:/docker-entrypoint-initdb.d
-            - ./db/mysql-entrypoint.sh:/home/Chinook/mysql-entrypoint.sh
     postgres:
         image: postgres
         ports:
