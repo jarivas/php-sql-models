@@ -57,9 +57,9 @@ class GenerationSqlite extends Generation
 
         foreach ($result as $info) {
             $name = $info['name'];
-            $_type = $this->convertType($info['type']);
+            $typeName = $this->convertType($info['type']);
 
-            $columns[] = new ColumnInfo($name, $_type, $info['notnull'] != '1');
+            $columns[] = new ColumnInfo($name, $typeName, $info['notnull'] != '1');
         }
 
         return $columns;
@@ -67,27 +67,27 @@ class GenerationSqlite extends Generation
     }//end getColumnsInfo()
 
 
-    protected function convertType(string $_type): string
+    protected function convertType(string $typeName): string
     {
-        if (str_contains($_type, 'INT')) {
+        if (str_contains($typeName, 'INT')) {
             return PhpTypes::Integer->value;
         }
 
-        if (str_contains($_type, 'BOOLEAN')) {
+        if (str_contains($typeName, 'BOOLEAN')) {
             return PhpTypes::Bool->value;
         }
 
-        if (str_contains($_type, 'CHAR')
-        || str_contains($_type, 'TEXT')
-        || str_contains($_type, 'DATE')) {
+        if (str_contains($typeName, 'CHAR')
+        || str_contains($typeName, 'TEXT')
+        || str_contains($typeName, 'DATE')) {
             return PhpTypes::String->value;
         }
 
-        if (str_contains($_type, 'REAL')
-        || str_contains($_type, 'DOUBLE')
-        || str_contains($_type, 'FLOAT')
-        || str_contains($_type, 'NUMERIC')
-        || str_contains($_type, 'DECIMAL')
+        if (str_contains($typeName, 'REAL')
+        || str_contains($typeName, 'DOUBLE')
+        || str_contains($typeName, 'FLOAT')
+        || str_contains($typeName, 'NUMERIC')
+        || str_contains($typeName, 'DECIMAL')
         ) {
             return PhpTypes::Float->value;
         }

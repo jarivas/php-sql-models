@@ -46,9 +46,9 @@ class GenerationMysql extends Generation
 
         foreach ($result as $info) {
             $name  = $info['Field'];
-            $_type = $this->convertType($info['Type']);
+            $typeName = $this->convertType($info['Type']);
 
-            $columns[] = new ColumnInfo($name, $_type, $info['Null'] != 'NO');
+            $columns[] = new ColumnInfo($name, $typeName, $info['Null'] != 'NO');
         }
 
         return $columns;
@@ -56,32 +56,32 @@ class GenerationMysql extends Generation
     }//end getColumnsInfo()
 
 
-    protected function convertType(string $_type): string
+    protected function convertType(string $typeName): string
     {
-        if (str_contains($_type, 'int')) {
+        if (str_contains($typeName, 'int')) {
             return PhpTypes::Integer->value;
         }
 
-        if (str_contains($_type, 'char')
-        || str_contains($_type, 'text')
-        || str_contains($_type, 'date')
-        || str_contains($_type, 'time')
-        || str_contains($_type, 'year')
-        || str_contains($_type, 'enum')
-        || str_contains($_type, 'set')) {
+        if (str_contains($typeName, 'char')
+        || str_contains($typeName, 'text')
+        || str_contains($typeName, 'date')
+        || str_contains($typeName, 'time')
+        || str_contains($typeName, 'year')
+        || str_contains($typeName, 'enum')
+        || str_contains($typeName, 'set')) {
             return PhpTypes::String->value;
         }
 
-        if (str_contains($_type, 'bool')
-        || str_contains($_type, 'bit')) {
+        if (str_contains($typeName, 'bool')
+        || str_contains($typeName, 'bit')) {
             return PhpTypes::Bool->value;
         }
 
-        if (str_contains($_type, 'real')
-        || str_contains($_type, 'double')
-        || str_contains($_type, 'float')
-        || str_contains($_type, 'numeric')
-        || str_contains($_type, 'decimal')
+        if (str_contains($typeName, 'real')
+        || str_contains($typeName, 'double')
+        || str_contains($typeName, 'float')
+        || str_contains($typeName, 'numeric')
+        || str_contains($typeName, 'decimal')
         ) {
             return PhpTypes::Float->value;
         }

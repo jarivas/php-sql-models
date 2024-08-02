@@ -8,7 +8,7 @@ class ColumnInfo
 {
 
 
-    public function __construct(public string $name='', public string $_type='', public bool $nullable=true)
+    public function __construct(public string $name='', public string $typeName='', public bool $nullable=true)
     {
 
     }//end __construct()

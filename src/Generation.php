@@ -30,7 +30,7 @@ abstract class Generation
     /**
      * @return bool|array<ColumnInfo>
      */
-    abstract protected function getColumnsInfo(string $_tableName): bool|array;
+    abstract protected function getColumnsInfo(string $tableName): bool|array;
 
 
     public function __construct(
@@ -183,11 +183,11 @@ abstract class Generation
             return false;
         }
 
-        foreach ($tableNames as $_tableName) {
-            $columns = $this->getColumnsInfo($_tableName);
+        foreach ($tableNames as $tableName) {
+            $columns = $this->getColumnsInfo($tableName);
 
             if (is_array($columns)) {
-                $result[] = new TableInfo($_tableName, $columns);
+                $result[] = new TableInfo($tableName, $columns);
             }
         }
 
@@ -220,9 +220,9 @@ abstract class Generation
     protected function generateModels(array $tablesInfo, string $modelContent): void
     {
         foreach ($tablesInfo as $table) {
-            $_tableName = $table->name;
+            $tableName = $table->name;
 
-            $fileName = preg_replace("/[^\w_]/", '', $_tableName);
+            $fileName = preg_replace("/[^\w_]/", '', $tableName);
 
             if (is_string($fileName)) {
                 $fileName = str_replace('_', '', ucwords($fileName, '_'));
@@ -242,7 +242,7 @@ abstract class Generation
                     ],
                     [
                         $fileName,
-                        $_tableName,
+                        $tableName,
                         $columns,
                         $properties,
                         ucfirst($this->dbInfo->type->value),
@@ -270,7 +270,7 @@ abstract class Generation
         foreach ($columnsInfo as $info) {
             $nullable = $info->nullable ? '?' : '';
             $columns .= "\n        '{$info->name}',";
-            $text     = $nullable.$info->_type.' $'.$info->name;
+            $text     = $nullable.$info->typeName.' $'.$info->name;
 
             $properties .= "    /**\n";
             $properties .= "     * @var $text\n";
