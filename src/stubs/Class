@@ -11,9 +11,14 @@ class {{class_name}} extends Model
 {
 
     /**
-     * @var string $tName
+     * @var string $tableName
      */
-    public static string $tName = '{{table_name}}';
+    public static string $tableName = '{{table_name}}';
+
+    /**
+     * @var string $primaryKey
+     */
+    public static string $primaryKey = 'id';
 
     /**
      * @var Dbms $dbms

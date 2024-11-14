@@ -32,3 +32,27 @@ services:
             - POSTGRES_PASSWORD=$MYSQL_PASSWORD
         volumes:
             - ./db/Postgres:/docker-entrypoint-initdb.d
+    sqlsrv:
+        image: mcr.microsoft.com/mssql/server:latest
+        ports:
+            - 1433:1433
+        environment:
+            - ACCEPT_EULA=Y
+            - MSSQL_SA_PASSWORD=Password0!
+        volumes:
+            - ./db/Sqlserver:/scripts
+        command: 
+        - /bin/bash
+        - -c 
+        - |
+            # Launch MSSQL and send to background
+            /opt/mssql/bin/sqlservr &
+            # Wait 30 seconds for it to be available
+            # (lame, I know, but there's no nc available to start prodding network ports)
+            sleep 30
+            # Run every script in /scripts
+            # TODO set a flag so that this is only done once on creation, 
+            #      and not every time the container runs
+            /opt/mssql-tools18/bin/sqlcmd -U sa -P Password0! -C -i /scripts/chinook.sql
+            # So that the container doesn't shut down, sleep this thread
+            sleep infinity

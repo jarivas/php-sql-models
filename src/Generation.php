@@ -34,9 +34,9 @@ abstract class Generation
 
 
     public function __construct(
-        private DbConnectionInfo $dbInfo,
-        private string $targetFolder,
-        private string $namespace
+        protected DbConnectionInfo $dbInfo,
+        protected string $targetFolder,
+        protected string $namespace
         ) {
 
     }//end __construct()
