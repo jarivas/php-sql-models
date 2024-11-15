@@ -64,10 +64,10 @@ class ModelTest extends TestCase
 
     public function testSelect(): void
     {
-        $model = new Album();
+        $albums = Album::get();
 
-        $model->select(['Title']);
-        $model->hydrate(null);
+        $model = new Album(['Title' => $albums[0]->Title]);
+        $model->hydrate();
 
         $this->assertNotFalse($model);
         $this->assertInstanceOf(Album::class, $model);
@@ -90,7 +90,7 @@ class ModelTest extends TestCase
         $album->AlbumId  = $id;
         $album->ArtistId = 1;
 
-        $album->save(null);
+        $album->insert();
 
         $album2 = Album::first(['AlbumId' => $id]);
 
@@ -132,9 +132,9 @@ class ModelTest extends TestCase
 
         $album->Title = __FUNCTION__;
 
-        $album->save('AlbumId');
+        $album->save();
 
-        $album->delete('AlbumId');
+        $album->delete();
 
         $album = Album::first(['Title' => __FUNCTION__]);
 

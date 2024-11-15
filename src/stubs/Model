@@ -8,11 +8,16 @@ use JsonSerializable;
 
 class Model implements JsonSerializable
 {
-    
+
     /**
-     * @var string $tName
+     * @var string $tableName
      */
-    public static string $tName = '';
+    public static string $tableName = '';
+
+    /**
+     * @var string $primaryKey
+     */
+    public static string $primaryKey = 'id';
 
     /**
      * @var Dbms $dbms
@@ -64,35 +69,44 @@ class Model implements JsonSerializable
      */
     protected int $offset = 0;
 
+
     /**
      * @param array<string, mixed> $columnValues
      * @return bool|static
      */
-    public static function first(array $columnValues = []): bool|static
+    public static function first(array $columnValues=[]): bool|static
     {
-        // @phpstan-ignore-next-line
-        $new = new static();
+        $rows = self::get($columnValues, 0, 1);
 
-        $new->setValues($columnValues, true);
-
-        $rows = $new->query(false);
-
-        if (! is_array($rows) || empty($rows)) {
-            return false;
-        }
-
-        return $rows[0];
+        return $rows ? $rows[0] : false;
 
     }//end first()
+
+
+    public static function last(array $columnValues=[]): bool|static
+    {
+        $rows = self::get(
+            $columnValues,
+            0,
+            1,
+            [],
+            [static::$primaryKey => 'DESC'],
+        );
+
+        return $rows ? $rows[0] : false;
+
+    }//end last()
+
 
     /**
      * @param array<string, mixed> $columnValues
      * @param int $offset
      * @param int $limit
      * @param array<string> $columns
+     * @param array<string> $orderBy
      * @return bool|array<static>
      */
-    public static function get(array $columnValues = [], int $offset = 0, int $limit = 100, array $columns = []): bool|array
+    public static function get(array $columnValues=[], int $offset=0, int $limit=100, array $columns=[], array $orderBy=[]): bool|array
     {
         // @phpstan-ignore-next-line
         $new = new static();
@@ -103,8 +117,9 @@ class Model implements JsonSerializable
 
         $new->offset($offset);
         $new->limit($limit);
+        $new->order($orderBy);
 
-        $rows = $new->query();
+        $rows = $new->query(false);
 
         if (! is_array($rows) || empty($rows)) {
             return false;
@@ -114,21 +129,24 @@ class Model implements JsonSerializable
 
     }//end get()
 
+
     /**
      * @param null|array<string, mixed> $columnValues
      */
-    public function __construct(null|array $columnValues = null)
+    public function __construct(null|array $columnValues=null)
     {
         if (!empty($columnValues)) {
             $this->setValues($columnValues);
         }
+
     }//end __construct()
-    
+
+
     /**
      * @param array<string, mixed> $columnValues
      * @param bool $where
      */
-    public function setValues(array $columnValues, bool $where = false): void
+    public function setValues(array $columnValues, bool $where=false): void
     {
         foreach ($columnValues as $column => $value) {
             if (in_array($column, static::$columns)) {
@@ -141,10 +159,11 @@ class Model implements JsonSerializable
                         'operator'           => '=',
                     ];
                 }
-            }            
+            }
         }
 
     }//end setValues()
+
 
     /**
      * @param array<string> $columns
@@ -157,7 +176,7 @@ class Model implements JsonSerializable
             return;
         }
 
-        foreach($columns as $column) {
+        foreach ($columns as $column) {
             if (in_array($column, static::$columns)) {
                 $this->selectedColumns[] = $column;
             }
@@ -165,64 +184,70 @@ class Model implements JsonSerializable
 
     }//end select()
 
+
     /**
      * @param Join $joinType
-     * @param string $tName
+     * @param string $tableName
      * @param string $onCol1
      * @param string $onCol2
      */
-    public function join(Join $joinType, string $tName, string $onCol1, string $onCol2): void
+    public function join(Join $joinType, string $tableName, string $onCol1, string $onCol2): void
     {
         $this->joins[] = [
             'type'      => $joinType->value,
-            'tableName' => $tName,
+            'tableName' => $tableName,
             'onCol1'    => $onCol1,
             'onCol2'    => $onCol2,
         ];
 
     }//end join()
 
+
     /**
      * @param string $column
      * @param string $operator
      * @param string $operator
      */
-    public function where(string $column, string $operator, mixed $value = null): void
+    public function where(string $column, string $operator, mixed $value=null): void
     {
         $this->where[] = $this->whereHelper('AND', $column, $operator, $value);
 
     }//end where()
 
+
     /**
      * @param string $column
      * @param string $operator
      */
-    public function whereOr(string $column, string $operator, mixed $value = null): void
+    public function whereOr(string $column, string $operator, mixed $value=null): void
     {
         $this->where[] = $this->whereHelper('OR', $column, $operator, $value);
 
     }//end whereOr()
 
+
     /**
      * @param string $column
      * @param string $operator
      */
-    public function having(string $column, string $operator, mixed $value = null): void
+    public function having(string $column, string $operator, mixed $value=null): void
     {
         $this->having[] = $this->whereHelper('AND', $column, $operator, $value);
 
     }//end having()
+
 
     /**
      * @param string $column
      * @param string $operator
      * @param mixed $value
      */
-    public function havingOr(string $column, string $operator, mixed $value = null): void
+    public function havingOr(string $column, string $operator, mixed $value=null): void
     {
         $this->having[] = $this->whereHelper('OR', $column, $operator, $value);
 
     }//end havingOr()
+
 
     /**
      * @param string  $column
@@ -233,14 +258,20 @@ class Model implements JsonSerializable
 
     }//end groupBy()
 
+
     /**
-     * @param array<string, string> $order
+     * @param array<string> $order
      */
     public function order(array $order): void
     {
-        $this->order[] = $order;
+        if (!empty($order)) {
+            foreach ($order as $col => $direction) {
+                $this->order[$col] = $direction;
+            }
+        }
 
     }//end order()
+
 
     /**
      * @param int $limit
@@ -251,6 +282,7 @@ class Model implements JsonSerializable
 
     }//end limit()
 
+
     /**
      * @param int $offset
      */
@@ -260,13 +292,16 @@ class Model implements JsonSerializable
 
     }//end offset()
 
+
     /**
      * @param string|null $pk on tables with primary no autoincrement, please use null
-     * 
+     *
      * @return bool
      */
-    public function delete(string|null $pk = 'id'): bool
+    public function delete(): bool
     {
+        $pk = static::$primaryKey;
+
         if (empty($this->$pk)) {
             return false;
         }
@@ -275,7 +310,7 @@ class Model implements JsonSerializable
 
         $this->where($pk, '=');
 
-        $sql = SqlGenerator::generateDelete(static::$dbms, static::$tName, $params, $this->criteriaHelper($this->where));
+        $sql = SqlGenerator::generateDelete(static::$dbms, static::$tableName, $params, $this->criteriaHelper($this->where));
 
         unset($this->$pk);
 
@@ -287,13 +322,14 @@ class Model implements JsonSerializable
 
     }//end delete()
 
+
     /**
      * @param bool $resetFilter
      * @param bool $debug
-     * 
+     *
      * @return bool|array<static> array of current model
      */
-    public function query(bool $resetFilter = true, bool $debug = false): mixed
+    public function query(bool $resetFilter=true, bool $debug=false): mixed
     {
         $cols   = static::$columns;
         $params = [];
@@ -306,14 +342,14 @@ class Model implements JsonSerializable
 
         $sql = SqlGenerator::generateSelect(
             static::$dbms,
-            static::$tName,
+            static::$tableName,
             $params,
             $cols,
             $this->joins,
             $this->criteriaHelper($this->where),
             $this->groupBy,
             $this->criteriaHelper($this->having),
-            $this->order,
+            $this->orderHelper(),
             $this->limit,
             $this->offset
         );
@@ -329,34 +365,38 @@ class Model implements JsonSerializable
 
         return Connection::getInstance()->get($sql, $params, static::class);
 
-    }//end get()
+    }//end query()
 
-    /**
-     * @param string|null $pk on tables with primary no autoincrement, please use null
-     */
-    public function save(string|null $pk = 'id'): void
+
+    public function save(): void
     {
-        isset($this->$pk) ? $this->update($pk) : $this->insert($pk);
+        $pk = static::$primaryKey;
+
+        isset($this->$pk) ? $this->update() : $this->insert();
 
     }//end save()
 
-    /**
-     * @param string|null $pk on tables with primary no autoincrement, please use null
-     */
-    public function hydrate(string|null $pk = 'id'): void
+
+    public function hydrate(): void
     {
-        $this->limit = 1;
-        $this->offset = 0;
-        if ($pk) {
-            $this->where($pk,'=');
+        $pk = static::$primaryKey;
+
+        if (empty($this->$pk)) {
+            return;
         }
+
+        $this->limit  = 1;
+        $this->offset = 0;
+        $this->where($pk,'=');
 
         $rows = $this->query(false);
 
         if (! is_bool($rows)) {
             $this->setValues($rows[0]->toArray());
-        }       
+        }
+
     }//end hydrate()
+
 
     public function __toString(): string
     {
@@ -365,6 +405,7 @@ class Model implements JsonSerializable
         return strval(json_encode($data, JSON_PRETTY_PRINT));
 
     }//end __toString()
+
 
     /**
      * @return array<string, mixed>
@@ -375,6 +416,7 @@ class Model implements JsonSerializable
 
     }//end jsonSerialize()
 
+
     /**
      * @return array<string, mixed>
      */
@@ -383,6 +425,7 @@ class Model implements JsonSerializable
         return $this->columnsToParams();
 
     }//end toArray()
+
 
     /**
      * @param string $conditionOperator
@@ -394,16 +437,15 @@ class Model implements JsonSerializable
     {
         return [
             'condition_operator' => $conditionOperator,
-            'column' => $column,
-            'operator' => $operator,
-            'value'=> $value
+            'column'             => $column,
+            'operator'           => $operator,
+            'value'              => $value,
         ];
-    }
 
-    /**
-     * @return array<string, mixed>
-     */
-    protected function columnsToParams(string|null $pk=null): array
+    }//end whereHelper()
+
+
+    protected function columnsToParams(): array
     {
         $params = [];
 
@@ -413,56 +455,45 @@ class Model implements JsonSerializable
             }
         }
 
-        if ($pk && isset($this->$pk)) {
-            unset($params[$pk]);
-        }
-
         return $params;
 
     }//end columnsToParams()
 
-    /**
-     * @param string|null $pk on tables with primary no autoincrement, please use null
-     */
-    protected function insert(string|null $pk = 'id'): void
+
+    public function insert(): void
     {
-        $params     = $this->columnsToParams($pk);
+        $params     = $this->columnsToParams();
         $connection = Connection::getInstance();
 
-        $sql = SqlGenerator::generateInsert(static::$dbms, static::$tName, $params);
+        $sql = SqlGenerator::generateInsert(static::$dbms, static::$tableName, $params);
 
         $connection->executeSql($sql, $params);
 
-        if (is_null($pk)) {
-            return;
-        }
-
-        $id = $connection->lastInsertId();
-
-        if (!$id) {
-            throw new Exception('empty lastInsertId');
-        }
-
-        $this->$pk = intval($id);
+        $this->setLastInsertId($connection);
 
     }//end insert()
 
-    /**
-     * @param string|null $pk on tables with primary no autoincrement, please use null
-     */
-    protected function update(string $pk = 'id'): void
+
+    public function update(): void
     {
-        $params = $this->columnsToParams($pk);
+        $pk     = static::$primaryKey;
+        $params = $this->columnsToParams();
 
         $this->where($pk, '=');
 
-        $sql = SqlGenerator::generateUpdate(static::$dbms, static::$tName, $params, $this->criteriaHelper($this->where));
+        $sql = SqlGenerator::generateUpdate(
+            static::$dbms,
+            static::$tableName,
+            $params,
+            $this->criteriaHelper($this->where)
+        );
 
         $this->resetFilters();
 
         Connection::getInstance()->executeSql($sql, $params);
 
     }//end update()
+
 
     /**
      * @param array $criteria array<string, mixed>
@@ -472,17 +503,17 @@ class Model implements JsonSerializable
     {
         $result = [];
 
-        if(empty($criteria)) {
+        if (empty($criteria)) {
             return $result;
         }
 
-        foreach($criteria as $c) {
+        foreach ($criteria as $c) {
             $field = $c['column'];
-            
+
             if (empty($c['value'])) {
                 $c['value'] = $this->$field;
-            }            
-            
+            }
+
             $result[] = $c;
         }
 
@@ -490,15 +521,64 @@ class Model implements JsonSerializable
 
     }//end criteriaHelper()
 
+
+    protected function orderHelper(): array
+    {
+        $order = [];
+
+        if (empty($this->order)) {
+            $this->order[static::$primaryKey] = 'ASC';
+        }
+
+        return $this->order;
+
+    }//end orderHelper()
+
+
+    protected function setLastInsertId(Connection $connection): void
+    {
+        $pk = static::$primaryKey;
+
+        if (!empty($this->$pk)) {
+            return;
+        }
+
+        $id = null;
+
+        try {
+            $id = $connection->lastInsertId();
+
+            if (!$id) {
+                throw new Exception('Last id not working');
+            }
+        } catch (Exception $exeption) {
+            $id = $this->getLastInsertIdHelper();
+        }
+
+        $this->$pk = intval($id);
+
+    }//end setLastInsertId()
+
+
+    protected function getLastInsertIdHelper(): mixed
+    {
+        $pk    = static::$primaryKey;
+        $model = static::last([$pk]);
+
+        return $model->$pk;
+
+    }//end getLastInsertIdHelper()
+
+
     protected function resetFilters(): void
     {
-        $this->joins  = [];
-        $this->where  = [];
-        $this->groupBy  = '';
-        $this->having = [];
-        $this->order  = [];
-        $this->limit  = 10;
-        $this->offset = 0;
+        $this->joins   = [];
+        $this->where   = [];
+        $this->groupBy = '';
+        $this->having  = [];
+        $this->order   = [];
+        $this->limit   = 10;
+        $this->offset  = 0;
 
     }//end resetFilters()
 

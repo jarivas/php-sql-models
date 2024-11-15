@@ -13,6 +13,9 @@
         <testsuite name="Sqlite">
             <directory suffix="Test.php">./tests/Unit/Sqlite</directory>
         </testsuite>
+        <testsuite name="Mssql">
+            <directory suffix="Test.php">./tests/Unit/Mssql</directory>
+        </testsuite>
     </testsuites>
     <logging>
         <log type="coverage-html" target="build/reports"/>

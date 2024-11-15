@@ -10,28 +10,28 @@ class SqlGenerator
 
     /**
      * @param Dbms $dbms
-     * @param string $tName
+     * @param string $tableName
      * @param array<string, string> $params
      * @param array<string> $selectedColumns
      * @param null|array<int, array<string, string>> $joins
      * @param null|array<int, array<string, string>> $where
      * @param null|string $groupBy
      * @param null|array<int, array<string, string>> $having
-     * @param null|array<int, array<string, string>> $orderBy
+     * @param array<int, array<string, string>> $orderBy
      * @param int $limit
      * @param int $offset
      * @return string
      */
     public static function generateSelect(
         Dbms $dbms,
-        string $tName,
+        string $tableName,
         array &$params,
         array $selectedColumns,
         null|array $joins=null,
         null|array $where=null,
         null|string $groupBy=null,
         null|array $having=null,
-        null|array $orderBy=null,
+        array $orderBy,
         int $limit=1000,
         int $offset=0
     ): string {
@@ -47,26 +47,24 @@ class SqlGenerator
 
         $o = self::generateOrderBy($dbms, $orderBy);
 
-        $l = self::generateLimit($limit);
+        $lof = self::generateLimitOffset($dbms,$limit, $offset);
 
-        $of = self::generateOffsset($offset);
+        $tableName = ($dbms != Dbms::Pgsql) ? $tableName : '"'.$tableName.'"';
 
-        $tName = ($dbms != Dbms::Pgsql) ? $tName : '"'.$tName.'"';
-
-        return "SELECT $c FROM $tName $j$w$g$h$o$l$of";
+        return "SELECT $c FROM $tableName $j$w$g$h$o$lof";
 
     }//end generateSelect()
 
 
     /**
      * @param Dbms $dbms
-     * @param string $tName
+     * @param string $tableName
      * @param array<string, string> $params
      * @return string
      */
     public static function generateInsert(
         Dbms $dbms,
-        string $tName,
+        string $tableName,
         array $params
         ): string
     {
@@ -74,73 +72,60 @@ class SqlGenerator
         $columns = self::generateColumns($dbms, $cols);
         $values  = self::generateValues($cols);
 
-        $tName = ($dbms != Dbms::Pgsql) ? $tName : '"'.$tName.'"';
+        $tableName = ($dbms != Dbms::Pgsql) ? $tableName : '"'.$tableName.'"';
 
-        return "INSERT INTO $tName ($columns) VALUES (:$values);";
+        return "INSERT INTO $tableName ($columns) VALUES (:$values);";
 
     }//end generateInsert()
 
 
     /**
      * @param Dbms $dbms
-     * @param string $tName
+     * @param string $tableName
      * @param array<string, string> $params
      * @param array<int, array<string, string>> $where
-     * @param null|array<int, array<string, string>> $orderBy
+     * @param array<int, array<string, string>> $orderBy
      * @param int $limit
      * @return string
      */
     public static function generateUpdate(
         Dbms $dbms,
-        string $tName,
+        string $tableName,
         array &$params,
-        array $where=[],
-        null|array $orderBy=null,
-        int $limit=0
+        array $where
         )
     {
         $s = self::generateSet($dbms, array_keys($params));
 
         $w = self::generateConditions($dbms, 'WHERE', $where, $params);
 
-        $o = self::generateOrderBy($dbms, $orderBy);
+        $tableName = ($dbms != Dbms::Pgsql) ? $tableName : '"'.$tableName.'"';
 
-        $l = ($limit > 0) ? self::generateLimit($limit): '';
-
-        $tName = ($dbms != Dbms::Pgsql) ? $tName : '"'.$tName.'"';
-
-        return "UPDATE $tName SET $s$w$o$l";
+        return "UPDATE $tableName SET $s$w";
 
     }//end generateUpdate()
 
 
     /**
      * @param Dbms $dbms
-     * @param string $tName
+     * @param string $tableName
      * @param array<string, string> $params
      * @param array<int, array<string, string>> $where
-     * @param null|array<int, array<string, string>> $orderBy
-     * @param int $limit
+     * @param array<int, array<string, string>> $orderBy
      * @return string
      */
     public static function generateDelete(
         Dbms $dbms,
-        string $tName,
+        string $tableName,
         array &$params,
         array $where=[],
-        null|array $orderBy=null,
-        int $limit=0
         ): string
     {
         $w = self::generateConditions($dbms, 'WHERE', $where, $params);
 
-        $o = self::generateOrderBy($dbms, $orderBy);
+        $tableName = ($dbms != Dbms::Pgsql) ? $tableName : '"'.$tableName.'"';
 
-        $l = ($limit > 0) ? self::generateLimit($limit): '';
-
-        $tName = ($dbms != Dbms::Pgsql) ? $tName : '"'.$tName.'"';
-
-        return "DELETE FROM $tName $w";
+        return "DELETE FROM $tableName $w";
 
     }//end generateDelete()
 
@@ -168,17 +153,18 @@ class SqlGenerator
             return '';
         }
 
-        $sql = '';
+        $sql  = '';
         $isPg = ($dbms == Dbms::Pgsql);
 
         foreach ($joins as $j) {
             $format = $isPg ? ' %s JOIN %s ON "%s" = "%s"' : ' %s JOIN %s ON %s = "%s"';
-            $sql .= sprintf($format, $j['type'], $j['tableName'], $j['onCol1'], $j['onCol2']);
+            $sql   .= sprintf($format, $j['type'], $j['tableName'], $j['onCol1'], $j['onCol2']);
         }
 
         return $sql;
 
     }//end generateJoins()
+
 
     /**
      * @param Dbms $dbms
@@ -197,23 +183,25 @@ class SqlGenerator
             return '';
         }
 
-        $sql  = " $conditionType 1=1";
+        $sql = '';
 
         foreach ($conditions as $i => $c) {
             $operator = $c['operator'];
             $col      = ($dbms != Dbms::Pgsql) ? $c['column'] : '"'.$c['column'].'"';
+            $conditionOperator = empty($sql) ? $conditionType : $c['condition_operator'];
 
             if ($operator != 'IN') {
-                $sql .= sprintf(' %s %s %s :%s%s', $c['condition_operator'], $col, $operator, $c['column'], $i);
+                $sql .= sprintf(' %s %s %s :%s%s', $conditionOperator, $col, $operator, $c['column'], $i);
                 $params[$c['column'].$i] = $c['value'];
             } else {
-                $sql .= sprintf(' %s %s IN %s', $c['condition_operator'], $col, $c['value']);
+                $sql .= sprintf(' %s %s IN %s', $conditionOperator, $col, $c['value']);
             }
         }
 
         return $sql;
 
     }//end generateConditions()
+
 
     /**
      * @param Dbms $dbms
@@ -231,6 +219,13 @@ class SqlGenerator
     }//end generateGroupBy()
 
 
+    protected static function generateLimitOffset(Dbms $dbms, int $limit=100, int $offset=0): string
+    {
+        return ($dbms != Dbms::Mssql) ? " LIMIT $limit OFFSET $offset" : "OFFSET $offset ROWS FETCH FIRST $limit ROWS ONLY";
+
+    }//end generateLimitOffset()
+
+
     /**
      * @param int $limit
      * @return string
@@ -243,34 +238,20 @@ class SqlGenerator
 
 
     /**
-     * @param int $offset
-     * @return string
-     */
-    protected static function generateOffsset(int $offset=0): string
-    {
-        return " OFFSET $offset";
-
-    }//end generateOffsset()
-
-
-    /**
      * @param Dbms $dbms
-     * @param null|array<array<string, string>> $orderBy
+     * @param array<array<string, string>> $orderBy
      * @return string
      */
-    protected static function generateOrderBy(Dbms $dbms, null|array $orderBy): string
+    protected static function generateOrderBy(Dbms $dbms, array $orderBy): string
     {
-        if (empty($orderBy)) {
-            return '';
-        }
-
         $sql = ' ORDER BY ';
 
-        foreach ($orderBy as $order) {
-            $sql .= implode(' ', $order);
+        foreach ($orderBy as $col => $direction) {
+            $col = ($dbms != Dbms::Pgsql) ? $col : '"'.$col.'"';
+            $sql .= "$col $direction ";
         }
 
-        return ' ORDER BY '.self::generateColumns($dbms, $orderBy);
+        return $sql;
 
     }//end generateOrderBy()
 
@@ -293,16 +274,16 @@ class SqlGenerator
      */
     protected static function generateSet(Dbms $dbms, array $cols): string
     {
-        $sql = '';
+        $sql  = '';
         $isPg = ($dbms == Dbms::Pgsql);
-        
+
         foreach ($cols as $c) {
             $sql .= $isPg ? " \"$c\" = :$c," : " $c = :$c,";
         }
 
         return substr($sql, 0, -1);
 
-    }//end generateValues()
+    }//end generateSet()
 
 
 }//end class

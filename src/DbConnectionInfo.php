@@ -33,7 +33,14 @@ class DbConnectionInfo
 
     private function setDsn(): void
     {
-        $this->dsn = ($this->type == Dbms::Sqlite) ? "sqlite:{$this->dbHost}/{$this->dbName}" : "{$this->type->value}:host={$this->dbHost};dbname={$this->dbName};port={$this->dbPort}";
+        $dsn = "{$this->type->value}:host={$this->dbHost};dbname={$this->dbName};port={$this->dbPort}";
+
+        $this->dsn = match ($this->type) {
+            Dbms::Mysql => $dsn,
+            Dbms::Pgsql => $dsn,
+            Dbms::Sqlite => "sqlite:{$this->dbHost}/{$this->dbName}",
+            Dbms::Mssql => "sqlsrv:Server={$this->dbHost},{$this->dbPort};Database={$this->dbName};TrustServerCertificate=1",
+        };
 
     }//end setDsn()
 
@@ -47,7 +54,7 @@ class DbConnectionInfo
         $remotePort = $this->dbPort;
 
         ++$this->dbPort;
-        
+
         $this->sshTunnel = "sshpass -p {$this->sshPassword} ssh -fNg -L {$this->dbPort}:{$this->sshHost}:{$remotePort} {$this->sshUsername}@{$this->sshHost} -p {$this->sshPort}";
 
     }//end setSshTunnel()
