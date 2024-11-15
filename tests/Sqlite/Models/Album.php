@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SqlModels\Tests\Mssql\Models;
+namespace SqlModels\Tests\Sqlite\Models;
 
 /**
  * @method static bool|Album first(array<string, mixed> $columnValues)
@@ -23,7 +23,7 @@ class Album extends Model
     /**
      * @var Dbms $dbms
      */
-    protected static Dbms $dbms = Dbms::Mssql;
+    protected static Dbms $dbms = Dbms::Sqlite;
 
     /**
      * @var array<string> $columns

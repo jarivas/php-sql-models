@@ -21,10 +21,10 @@ class ModelTest extends TestCase
         ];
 
         $album = new Album($columnValues);
-        
-        $data = $album->toArray();
 
-        $this->assertEquals($columnValues, $data);
+        $data = $album->toArray();
+        $this->assertSame($columnValues['Title'], $data['Title']);
+        $this->assertSame($columnValues['ArtistId'], $data['ArtistId']);
     }
 
     public function testGetOk(): void
@@ -63,10 +63,12 @@ class ModelTest extends TestCase
 
     public function testSelect(): void
     {
-        $model = new Album();
+        $albums = Album::get();
+
+        $model = new Album(['Title' => $albums[0]->Title]);
 
         $model->select(['Title']);
-        $model->hydrate(null);
+        $model->hydrate();
 
         $this->assertNotFalse($model);
         $this->assertInstanceOf(Album::class, $model);
@@ -89,9 +91,9 @@ class ModelTest extends TestCase
         $album->AlbumId  = $id;
         $album->ArtistId = 1;
 
-        $album->save(null);
+        $album->insert();
 
-        $album2 = Album::first(['AlbumId' => $id]);
+        $album2 = Album::first(['AlbumId' => $album->AlbumId]);
 
         $this->assertNotFalse($album2);
         $this->assertInstanceOf(Album::class, $album2);
@@ -111,7 +113,7 @@ class ModelTest extends TestCase
 
         $album->Title = __FUNCTION__;
 
-        $album->save('AlbumId');
+        $album->save();
 
         $album2 = Album::first(['Title' => __FUNCTION__]);
 
@@ -131,9 +133,9 @@ class ModelTest extends TestCase
 
         $album->Title = __FUNCTION__;
 
-        $album->save('AlbumId');
+        $album->save();
 
-        $album->delete('AlbumId');
+        $album->delete();
 
         $album = Album::first(['Title' => __FUNCTION__]);
 

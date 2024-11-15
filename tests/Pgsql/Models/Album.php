@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SqlModels\Tests\Mssql\Models;
+namespace SqlModels\Tests\Pgsql\Models;
 
 /**
  * @method static bool|Album first(array<string, mixed> $columnValues)
@@ -23,15 +23,15 @@ class Album extends Model
     /**
      * @var Dbms $dbms
      */
-    protected static Dbms $dbms = Dbms::Mssql;
+    protected static Dbms $dbms = Dbms::Pgsql;
 
     /**
      * @var array<string> $columns
      */
     protected static array $columns = [
         'AlbumId',
-        'Title',
         'ArtistId',
+        'Title',
     ];
 
     /**
@@ -40,14 +40,14 @@ class Album extends Model
     public int $AlbumId;// phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
 
     /**
-     * @var string $Title
-     */
-    public string $Title;// phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
-
-    /**
      * @var int $ArtistId
      */
     public int $ArtistId;// phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
+
+    /**
+     * @var string $Title
+     */
+    public string $Title;// phpcs:ignore Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps
 
 
 }//end class

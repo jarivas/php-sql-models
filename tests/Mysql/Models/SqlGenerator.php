@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace SqlModels\Tests\Mssql\Models;
+namespace SqlModels\Tests\Mysql\Models;
 
 
 class SqlGenerator

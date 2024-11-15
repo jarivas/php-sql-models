@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace {{namespace}};
+namespace SqlModels\Tests\Mysql\Models;
 
 use Exception;
 use JsonSerializable;

@@ -92,22 +92,16 @@ class SqlGenerator
         Dbms $dbms,
         string $tableName,
         array &$params,
-        array $where=[],
-        array $orderBy,
-        int $limit=0
+        array $where
         )
     {
         $s = self::generateSet($dbms, array_keys($params));
 
         $w = self::generateConditions($dbms, 'WHERE', $where, $params);
 
-        $o = self::generateOrderBy($dbms, $orderBy);
-
-        $l = ($limit > 0) ? self::generateLimit($limit) : '';
-
         $tableName = ($dbms != Dbms::Pgsql) ? $tableName : '"'.$tableName.'"';
 
-        return "UPDATE $tableName SET $s$w$o$l";
+        return "UPDATE $tableName SET $s$w";
 
     }//end generateUpdate()
 
@@ -118,7 +112,6 @@ class SqlGenerator
      * @param array<string, string> $params
      * @param array<int, array<string, string>> $where
      * @param array<int, array<string, string>> $orderBy
-     * @param int $limit
      * @return string
      */
     public static function generateDelete(
@@ -126,16 +119,13 @@ class SqlGenerator
         string $tableName,
         array &$params,
         array $where=[],
-        int $limit=1
         ): string
     {
         $w = self::generateConditions($dbms, 'WHERE', $where, $params);
 
-        $l = ($limit > 0) ? self::generateLimit($limit) : '';
-
         $tableName = ($dbms != Dbms::Pgsql) ? $tableName : '"'.$tableName.'"';
 
-        return "DELETE FROM $tableName $w $l";
+        return "DELETE FROM $tableName $w";
 
     }//end generateDelete()
 
@@ -193,17 +183,18 @@ class SqlGenerator
             return '';
         }
 
-        $sql = " $conditionType 1=1";
+        $sql = '';
 
         foreach ($conditions as $i => $c) {
             $operator = $c['operator'];
             $col      = ($dbms != Dbms::Pgsql) ? $c['column'] : '"'.$c['column'].'"';
+            $conditionOperator = empty($sql) ? $conditionType : $c['condition_operator'];
 
             if ($operator != 'IN') {
-                $sql .= sprintf(' %s %s %s :%s%s', $c['condition_operator'], $col, $operator, $c['column'], $i);
+                $sql .= sprintf(' %s %s %s :%s%s', $conditionOperator, $col, $operator, $c['column'], $i);
                 $params[$c['column'].$i] = $c['value'];
             } else {
-                $sql .= sprintf(' %s %s IN %s', $c['condition_operator'], $col, $c['value']);
+                $sql .= sprintf(' %s %s IN %s', $conditionOperator, $col, $c['value']);
             }
         }
 
@@ -255,11 +246,12 @@ class SqlGenerator
     {
         $sql = ' ORDER BY ';
 
-        foreach ($orderBy as $order) {
-            $sql .= implode(' ', $order);
+        foreach ($orderBy as $col => $direction) {
+            $col = ($dbms != Dbms::Pgsql) ? $col : '"'.$col.'"';
+            $sql .= "$col $direction ";
         }
 
-        return ' ORDER BY '.self::generateColumns($dbms, $orderBy);
+        return $sql;
 
     }//end generateOrderBy()
 
