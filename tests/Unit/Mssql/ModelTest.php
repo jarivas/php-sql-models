@@ -10,14 +10,16 @@ use SqlModels\Tests\Mssql\Models\Connection;
 
 class ModelTest extends TestCase
 {
+
+
     public function testSetValuesOk(): void
     {
         $id = (time() + rand(1, 100));
 
         $columnValues = [
-            'Title' => __FUNCTION__.$id,
-            'AlbumId' => $id,
-            'ArtistId' => 1
+            'Title'    => __FUNCTION__.$id,
+            'AlbumId'  => $id,
+            'ArtistId' => 1,
         ];
 
         $album = new Album($columnValues);
@@ -25,7 +27,9 @@ class ModelTest extends TestCase
         $data = $album->toArray();
         $this->assertSame($columnValues['Title'], $data['Title']);
         $this->assertSame($columnValues['ArtistId'], $data['ArtistId']);
-    }
+
+    }//end testSetValuesOk()
+
 
     public function testGetOk(): void
     {
@@ -85,7 +89,7 @@ class ModelTest extends TestCase
     public function testCreate(): Album
     {
         $album = new Album();
-        $id = (time() + rand(1, 100));
+        $id    = (time() + rand(1, 100));
 
         $album->Title    = __FUNCTION__.$id;
         $album->AlbumId  = $id;
@@ -157,6 +161,15 @@ class ModelTest extends TestCase
         $this->assertSame(__FUNCTION__, $array['Title']);
 
     }//end testToJson()
+
+
+    public function testGetColumns(): void
+    {
+        $columns = Album::getColumns();
+
+        $this->assertIsArray($columns);
+
+    }//end testGetColumns()
 
 
 }//end class

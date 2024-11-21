@@ -13,12 +13,12 @@ class Playlist extends Model
     /**
      * @var string $tableName
      */
-    public static string $tableName = 'Playlist';
+    protected static string $tableName = 'Playlist';
 
     /**
      * @var string $primaryKey
      */
-    public static string $primaryKey = 'id';
+    protected static string $primaryKey = 'id';
 
     /**
      * @var Dbms $dbms

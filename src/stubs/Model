@@ -12,12 +12,12 @@ class Model implements JsonSerializable
     /**
      * @var string $tableName
      */
-    public static string $tableName = '';
+    protected static string $tableName = '';
 
     /**
      * @var string $primaryKey
      */
-    public static string $primaryKey = 'id';
+    protected static string $primaryKey = 'id';
 
     /**
      * @var Dbms $dbms
@@ -69,6 +69,10 @@ class Model implements JsonSerializable
      */
     protected int $offset = 0;
 
+    public static function getColumns(): array
+    {
+        return static::$columns;
+    }
 
     /**
      * @param array<string, mixed> $columnValues

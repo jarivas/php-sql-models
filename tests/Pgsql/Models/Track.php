@@ -13,12 +13,12 @@ class Track extends Model
     /**
      * @var string $tableName
      */
-    public static string $tableName = 'Track';
+    protected static string $tableName = 'Track';
 
     /**
      * @var string $primaryKey
      */
-    public static string $primaryKey = 'id';
+    protected static string $primaryKey = 'id';
 
     /**
      * @var Dbms $dbms

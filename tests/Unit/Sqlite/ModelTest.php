@@ -160,4 +160,13 @@ class ModelTest extends TestCase
     }//end testToJson()
 
 
+    public function testGetColumns(): void
+    {
+        $columns = Album::getColumns();
+
+        $this->assertIsArray($columns);
+
+    }//end testGetColumns()
+
+
 }//end class

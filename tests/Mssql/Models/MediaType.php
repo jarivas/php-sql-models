@@ -13,12 +13,12 @@ class MediaType extends Model
     /**
      * @var string $tableName
      */
-    public static string $tableName = 'MediaType';
+    protected static string $tableName = 'MediaType';
 
     /**
      * @var string $primaryKey
      */
-    public static string $primaryKey = 'id';
+    protected static string $primaryKey = 'id';
 
     /**
      * @var Dbms $dbms

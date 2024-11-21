@@ -13,12 +13,12 @@ class Employee extends Model
     /**
      * @var string $tableName
      */
-    public static string $tableName = 'Employee';
+    protected static string $tableName = 'Employee';
 
     /**
      * @var string $primaryKey
      */
-    public static string $primaryKey = 'id';
+    protected static string $primaryKey = 'id';
 
     /**
      * @var Dbms $dbms

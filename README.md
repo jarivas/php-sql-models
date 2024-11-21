@@ -10,6 +10,7 @@ Please check the tests code on tests/Unit
 
 # Tests
 * Requires Docker
-* ./vendor/bin/phpunit --testsuite Mysql
-* ./vendor/bin/phpunit --testsuite Pgsql
-* ./vendor/bin/phpunit --testsuite Sqlite
+* ./vendor/bin/phpunit --testsuite Mysql --filter ModelTest
+* ./vendor/bin/phpunit --testsuite Pgsql --filter ModelTest
+* ./vendor/bin/phpunit --testsuite Sqlite --filter ModelTest
+* ./vendor/bin/phpunit --testsuite Mssql --filter ModelTest

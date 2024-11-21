@@ -13,12 +13,12 @@ class Album extends Model
     /**
      * @var string $tableName
      */
-    public static string $tableName = 'Album';
+    protected static string $tableName = 'Album';
 
     /**
      * @var string $primaryKey
      */
-    public static string $primaryKey = 'AlbumId';
+    protected static string $primaryKey = 'AlbumId';
 
     /**
      * @var Dbms $dbms
