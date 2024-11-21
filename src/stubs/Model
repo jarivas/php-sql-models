@@ -69,6 +69,16 @@ class Model implements JsonSerializable
      */
     protected int $offset = 0;
 
+    public static function getTableName(): string
+    {
+        return static::tableName;
+    }
+
+    public static function getPrimaryKey(): string
+    {
+        return static::primaryKey;
+    }
+
     public static function getColumns(): array
     {
         return static::$columns;
