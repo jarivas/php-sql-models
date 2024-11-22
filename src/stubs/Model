@@ -71,12 +71,12 @@ class Model implements JsonSerializable
 
     public static function getTableName(): string
     {
-        return static::tableName;
+        return static::$tableName;
     }
 
     public static function getPrimaryKey(): string
     {
-        return static::primaryKey;
+        return static::$primaryKey;
     }
 
     public static function getColumns(): array
