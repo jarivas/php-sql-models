@@ -18,7 +18,7 @@ class {{class_name}} extends Model
     /**
      * @var string $primaryKey
      */
-    protected static string $primaryKey = 'id';
+    protected static string $primaryKey = '{{primary_key}}';
 
     /**
      * @var Dbms $dbms

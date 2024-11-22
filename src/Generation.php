@@ -221,6 +221,7 @@ abstract class Generation
     {
         foreach ($tablesInfo as $table) {
             $tableName = $table->name;
+            $primaryKey = $table->columns[0]->name;
 
             $fileName = preg_replace("/[^\w_]/", '', $tableName);
 
@@ -236,6 +237,7 @@ abstract class Generation
                     [
                         '{{class_name}}',
                         '{{table_name}}',
+                        '{{primary_key}}',
                         '{{columns}}',
                         '{{properties}}',
                         '{{type}}',
@@ -243,6 +245,7 @@ abstract class Generation
                     [
                         $fileName,
                         $tableName,
+                        $primaryKey,
                         $columns,
                         $properties,
                         ucfirst($this->dbInfo->type->value),
