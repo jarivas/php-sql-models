@@ -27,8 +27,10 @@ class Logger extends AbstractLogger
 
         $line = "{$microTime} :: {$level} :: {$message}\n";
 
-        fwrite(STDERR, $line);
-
+        $errorOutput = (defined('STDERR') === true) ? STDERR : fopen('php://stderr', 'w');
+        if ($errorOutput !== false) {
+            fwrite($errorOutput, $line);
+        }
     }//end log()
 
 
@@ -60,3 +62,4 @@ class Logger extends AbstractLogger
 
 
 }//end class
+
