@@ -31,7 +31,7 @@ class SqlGenerator
         null|array $where=null,
         null|string $groupBy=null,
         null|array $having=null,
-        array $orderBy,
+        array $orderBy=[],
         int $limit=1000,
         int $offset=0
     ): string {
@@ -45,7 +45,7 @@ class SqlGenerator
 
         $h = self::generateConditions($dbms, 'HAVING', $having, $params);
 
-        $o = self::generateOrderBy($dbms, $orderBy);
+        $o = self::generate($dbms, $);
 
         $lof = self::generateLimitOffset($dbms,$limit, $offset);
 
@@ -111,7 +111,6 @@ class SqlGenerator
      * @param string $tableName
      * @param array<string, string> $params
      * @param array<int, array<string, string>> $where
-     * @param array<int, array<string, string>> $orderBy
      * @return string
      */
     public static function generateDelete(
@@ -287,3 +286,4 @@ class SqlGenerator
 
 
 }//end class
+
