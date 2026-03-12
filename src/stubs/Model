@@ -55,7 +55,7 @@ class Model implements JsonSerializable
     protected $having = [];
 
     /**
-     * @var array<int, array<string, string>>  $order
+     * @var array<string, string>  $order
      */
     protected array $order = [];
 
@@ -79,6 +79,10 @@ class Model implements JsonSerializable
         return static::$primaryKey;
     }
 
+    /**
+     * Summary of getColumns
+     * @return array<string>
+     */
     public static function getColumns(): array
     {
         return static::$columns;
@@ -92,11 +96,15 @@ class Model implements JsonSerializable
     {
         $rows = self::get($columnValues, 0, 1);
 
-        return $rows ? $rows[0] : false;
+        return (is_bool($rows) || empty($rows)) ? false : $rows[0];
 
     }//end first()
 
-
+    /**
+     * Summary of last
+     * @param array<mixed> $columnValues
+     * @return bool|static
+     */
     public static function last(array $columnValues=[]): bool|static
     {
         $rows = self::get(
@@ -107,7 +115,7 @@ class Model implements JsonSerializable
             [static::$primaryKey => 'DESC'],
         );
 
-        return $rows ? $rows[0] : false;
+        return (is_bool($rows) || empty($rows)) ? false : $rows[0];
 
     }//end last()
 
@@ -117,7 +125,7 @@ class Model implements JsonSerializable
      * @param int $offset
      * @param int $limit
      * @param array<string> $columns
-     * @param array<string> $orderBy
+     * @param array<string, string> $orderBy
      * @return bool|array<static>
      */
     public static function get(array $columnValues=[], int $offset=0, int $limit=100, array $columns=[], array $orderBy=[]): bool|array
@@ -274,7 +282,7 @@ class Model implements JsonSerializable
 
 
     /**
-     * @param array<string> $order
+     * @param array<string, string> $order
      */
     public function order(array $order): void
     {
@@ -307,11 +315,6 @@ class Model implements JsonSerializable
     }//end offset()
 
 
-    /**
-     * @param string|null $pk on tables with primary no autoincrement, please use null
-     *
-     * @return bool
-     */
     public function delete(): bool
     {
         $pk = static::$primaryKey;
@@ -446,6 +449,7 @@ class Model implements JsonSerializable
      * @param string $column
      * @param string $operator
      * @param mixed $value
+     * @return array<string, mixed>
      */
     protected function whereHelper(string $conditionOperator, string $column, string $operator, mixed $value): array
     {
@@ -459,6 +463,10 @@ class Model implements JsonSerializable
     }//end whereHelper()
 
 
+    /**
+     * Summary of columnsToParams
+     * @return array<string, mixed>
+     */
     protected function columnsToParams(): array
     {
         $params = [];
@@ -510,8 +518,8 @@ class Model implements JsonSerializable
 
 
     /**
-     * @param array $criteria array<string, mixed>
-     * @return array
+     * @param array<int, array<string, mixed>> $criteria
+     * @return array<int, array<string, mixed>>
      */
     protected function criteriaHelper(array $criteria): array
     {
@@ -536,6 +544,10 @@ class Model implements JsonSerializable
     }//end criteriaHelper()
 
 
+    /**
+     * Summary of orderHelper
+     * @return array<string, string>
+     */
     protected function orderHelper(): array
     {
         $order = [];
@@ -598,3 +610,4 @@ class Model implements JsonSerializable
 
 
 }//end class
+
